@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>aspnet-IMS-D7908E39-F1A7-497F-95FD-6A38D45858C8</UserSecretsId>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.21" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.21" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.21" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.21" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.21" />
+        <PackageReference Include="MySql.Data" Version="8.1.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
+    </ItemGroup>
+
+</Project>

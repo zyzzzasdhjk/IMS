@@ -396,3 +396,13 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# 编译输出
+bin/
+obj/
+
+# 日志文件
+*.log
+
+# 临时文件
+temp/

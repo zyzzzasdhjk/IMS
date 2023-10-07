@@ -25,4 +25,5 @@ public interface IUserService
     /// <param name="password"></param>
     /// <returns></returns>
     public bool DeleteUser(string username, string password);
+    
 }

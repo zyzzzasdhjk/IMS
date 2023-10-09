@@ -1,6 +1,6 @@
 ﻿namespace IMS.Service.TeamServices;
 
-public interface ITeamService
+public interface ITeamSqlService
 {
     /// <summary>
     /// 新增成员
@@ -18,7 +18,7 @@ public interface ITeamService
     /// 获取所有成员
     /// </summary>
     /// <returns></returns>
-    public bool GetAllMembers();
+    public string GetAllMembers(int tid);
     
     /// <summary>
     /// 获取成员

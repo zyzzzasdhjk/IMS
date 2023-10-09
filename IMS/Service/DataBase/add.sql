@@ -1,0 +1,3 @@
+﻿USE web;
+
+INSERT INTO User VALUE ('123456','3BswQFduU+x68TRa4lI4vDWV5vWGFyC7RpCLR3dn5Qw=|ZxdbfnSxuvS6zxF/Dt3pjg==');

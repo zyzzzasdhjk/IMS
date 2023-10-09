@@ -1,6 +1,4 @@
-﻿using System;
-using System.Text.RegularExpressions;
-using IMS.Service.DataBase;
+﻿using System.Text.RegularExpressions;
 using IMS.Service.DataBase;
 using MySql.Data.MySqlClient;
 
@@ -47,7 +45,7 @@ public class UserService : IUserService
             password = PasswordHasher.HashPassword(password);
             
             /*查询是否存在相同的账号*/
-            string sql = "select count(*) from web.user where username = @username";
+            string sql = "select count(*) from web.User where username = @username";
             using (MySqlCommand sqlCommand = new MySqlCommand(sql,_connection))
             {
                 sqlCommand.Parameters.AddWithValue("@username", username);
@@ -58,7 +56,7 @@ public class UserService : IUserService
             }
             
             Console.WriteLine(password.Length);
-            sql = "insert into web.user(username, password) value(@username,@password)";
+            sql = "insert into web.User(username, password) value(@username,@password)";
             using (MySqlCommand sqlCommand = new MySqlCommand(sql,_connection))
             {
                 sqlCommand.Parameters.AddWithValue("@username", username);
@@ -77,7 +75,7 @@ public class UserService : IUserService
     public LoginStatus LoginUser(string username, string password)
     {
         /*根据账号进行查询*/
-        string sql = "select password from web.user where username = @username";
+        string sql = "select password from web.User where username = @username";
         using (MySqlCommand sqlCommand = new MySqlCommand(sql,_connection))
         {
             sqlCommand.Parameters.AddWithValue("@username", username);

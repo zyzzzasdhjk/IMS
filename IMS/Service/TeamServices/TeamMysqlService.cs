@@ -1,20 +1,19 @@
 ﻿using System.Text.Json;
-using System.Text.Json.Nodes;
 using IMS.Service.DataBase;
 using MySql.Data.MySqlClient;
 
 namespace IMS.Service.TeamServices;
 
-public class ITeamMysqlService : ITeamSqlService
+public class TeamMysqlService : ITeamSqlService
 {
     private MySqlConnection _connection;
     
-    public ITeamMysqlService(IRelationalDataBase m)
+    public TeamMysqlService(IRelationalDataBase m)
     {
         _connection = m.GetConnection();
     }
 
-    public string GetAllMembers(int tid)
+    public List<Dictionary<string, object>> GetAllMembers(int tid)
     {
         
         string sql = "select name, role, created_at from web.TeamMemberView where tid = @tid & role!='Deleted'";
@@ -24,21 +23,11 @@ public class ITeamMysqlService : ITeamSqlService
             var result = sqlCommand.ExecuteReader();
             if (result.HasRows)
             {
-                var list = new List<Dictionary<string, object>>();
-                while (result.Read())
-                {
-                    var dict = new Dictionary<string, object>();
-                    for (var i = 0; i < result.FieldCount; i++)
-                    {
-                        dict.Add(result.GetName(i), result.GetValue(i));
-                    }
-                    list.Add(dict);
-                }
-                return JsonSerializer.Serialize(list);;
+                return DataBaseFunction.GetJsonResult(result);
             }
             else
             {
-                return "";
+                return new List<Dictionary<string, object>>();
 
             }
         }

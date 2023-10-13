@@ -18,7 +18,7 @@ public interface ITeamSqlService
     /// 获取所有成员
     /// </summary>
     /// <returns></returns>
-    public string GetAllMembers(int tid);
+    public List<Dictionary<string, object>> GetAllMembers(int tid);
     
     /// <summary>
     /// 获取成员

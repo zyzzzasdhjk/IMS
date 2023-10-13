@@ -11,9 +11,15 @@ public class MysqlDataBase : IRelationalDataBase
     {
         /*计划使用task方法来优化*/
         //创建一个 MySqlConnection 对象，并传入连接字符串。连接字符串包含了数据库的地址、用户名、密码等信息
-        MySqlConnection connection = new MySqlConnection(
+        
+        /*MySqlConnection connection = new MySqlConnection(
             "Database=web;Data Source=101.43.94.40;port=3306;" 
-            + "User Id=CSuper;;SslMode=none;Password=76dfiu*T&,f+-&*UF;");
+            + "User Id=CSuper;;SslMode=none;Password=76dfiu*T&,f+-&*UF;");*/
+
+        MySqlConnection connection = new MySqlConnection(
+            "Database=web;Data Source=localhost;port=3306;"
+            + "User Id=root;;SslMode=none;Password=5151;"
+        );
         _connection = connection;
         _connection.Open();
     }

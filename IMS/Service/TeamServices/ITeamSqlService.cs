@@ -49,11 +49,26 @@ public interface ITeamSqlService
     /// <param name="json">需要更新的信息</param>
     /// <returns></returns>
     public ReturnMessageModel UpdateTeam(TeamInfo t);
+
+    /// <summary>
+    /// 更新团队人数
+    /// </summary>
+    /// <param name="tid"></param>
+    /// <param name="newNum"></param>
+    /// <returns></returns>
+    public ReturnMessageModel UpdateTeamPeopleMaxNum(int tid, int newNum);
     
     /// <summary>
     /// 删除团队
     /// </summary>
     /// <param name="tid"></param>
     /// <returns></returns>
-    public bool DeleteTeam(int tid);
+    public ReturnMessageModel DeleteTeam(int tid);
+    
+    /// <summary>
+    /// 对团队进行封禁,时间以小时计算
+    /// </summary>
+    /// <param name="tid"></param>
+    /// <returns></returns>
+    public ReturnMessageModel BanTeam(int tid,int time);
 }

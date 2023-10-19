@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS TeamInfo(
     tid INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(20) NOT NULL ,
     description TEXT, -- 描述
-    people_max_num TINYINT default 20,  -- 团队最大人数上限
+    peopleMaxNum TINYINT default 20,  -- 团队最大人数上限
     JoinCode VARCHAR(9), -- 加入码
     status ENUM('Normal','Banned','Deleted') default 'Normal' , -- 团队的状态
     created_at DATETIME   default CURRENT_TIMESTAMP null,
@@ -58,6 +58,7 @@ CREATE TABLE TaskInfo(
     name varchar(20),
     description text,
     status enum('Incomplete','Complete','Timeout','Abandon'),
+    proportion int, -- 分值，用于计算总的进度和当前进度
     created_at DATETIME   default CURRENT_TIMESTAMP null,
     end_at DATETIME, -- 预计的完成时间
     updated_at DATETIME   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP

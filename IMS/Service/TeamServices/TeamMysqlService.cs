@@ -11,6 +11,7 @@ namespace IMS.Service.TeamServices;
 public class TeamMysqlService : ITeamSqlService
 {
     private readonly IRelationalDataBase _m;
+    public readonly string[] TeamInfoColumns = new string[]{"name","description","joinCode","peopleMaxNum"};
     
     public TeamMysqlService(IRelationalDataBase m)
     {
@@ -183,7 +184,32 @@ public class TeamMysqlService : ITeamSqlService
         }
     }
 
-    public bool DeleteTeam(int tid)
+    public ReturnMessageModel UpdateTeamPeopleMaxNum(int tid,int newNum)
+    {
+        string sql = "update web.TeamInfo set peopleMaxNum = @newNum where tid = @tid";
+        var connection = _m.GetConnection();
+        using (MySqlCommand sqlCommand = new MySqlCommand(sql,connection))
+        {
+            sqlCommand.Parameters.AddWithValue("@tid", tid);
+            sqlCommand.Parameters.AddWithValue("@newNum", newNum);
+            var result = sqlCommand.ExecuteNonQuery();
+            return result >= 1 ? new ReturnMessageModel() : new ReturnMessageModel(false);
+        }
+    }
+    
+    public ReturnMessageModel DeleteTeam(int tid)
+    {
+        string sql = "delete from web.TeamInfo where tid = @tid";
+        var connection = _m.GetConnection();
+        using (MySqlCommand sqlCommand = new MySqlCommand(sql,connection))
+        {
+            sqlCommand.Parameters.AddWithValue("@tid", tid);
+            var result = sqlCommand.ExecuteNonQuery();
+            return result >= 1 ? new ReturnMessageModel() : new ReturnMessageModel(false);
+        }
+    }
+
+    public ReturnMessageModel BanTeam(int tid, int time)
     {
         throw new NotImplementedException();
     }

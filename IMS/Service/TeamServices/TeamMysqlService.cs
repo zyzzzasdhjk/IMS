@@ -145,8 +145,7 @@ public class TeamMysqlService : ITeamSqlService
                 joinCode = TeamFunction.GenerateJoinCode();
             }
         }
-        
-        string sql = "insert into web.TeamInfo (name, description,JoinCode) values (@name, @description,@joinCode)";
+        const string sql = "insert into web.TeamInfo (name, description,JoinCode) values (@name, @description,@joinCode)";
         using (MySqlCommand sqlCommand = new MySqlCommand(sql,connection))
         {
             sqlCommand.Parameters.AddWithValue("@name", t.Name);

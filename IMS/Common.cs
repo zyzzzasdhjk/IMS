@@ -16,8 +16,8 @@ public class Common
                 JObject j = (JObject)JToken.ReadFrom(reader);
                 
                 // 数据库连接字符串
-                JObject DataBaseObject = (JObject)j["DataBase"];
-                ConnectString = String.Format("Database={0};Data Source={1};port={2};User Id={3};;SslMode=none;Password={4};",DataBaseObject["database"], DataBaseObject["address"], DataBaseObject["port"], DataBaseObject["username"], DataBaseObject["password"]);
+                JObject dataBaseObject = (JObject)j["DataBase"];
+                ConnectString = String.Format("Database={0};Data Source={1};port={2};User Id={3};;SslMode=none;Password={4};",dataBaseObject["database"], dataBaseObject["address"], dataBaseObject["port"], dataBaseObject["username"], dataBaseObject["password"]);
                 /*ConnectString = j["DataBase"].ToString();*/
             }
         }

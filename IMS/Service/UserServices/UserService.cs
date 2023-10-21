@@ -1,16 +1,17 @@
 ﻿using System.Text.RegularExpressions;
 using IMS.Service.DataBase;
+using Microsoft.AspNetCore.Mvc.Razor;
 using MySql.Data.MySqlClient;
 
 namespace IMS.Service.UserServices;
 
 public class UserService : IUserService
 {
-    private MySqlConnection _connection;
+    private IRelationalDataBase _d;
 
     public UserService(IRelationalDataBase database)
     {
-        _connection = database.GetConnection();
+        _d = database;
     }
     
     /// <summary>
@@ -21,11 +22,32 @@ public class UserService : IUserService
     /// <returns></returns>
     private static bool IsPasswordValid(string password)
     {
-        return Regex.IsMatch(password, @"^(?=.*\d)(?=.*[a-zA-Z])(?=.*[\W_]).{8,}$");
+        return Regex.IsMatch(password, @"^(?![a-zA-Z]+$)(?!\d+$)(?![^\da-zA-Z\s]+$).{8,}$");
+    }
+    
+    /// <summary>
+    /// 判断用户是否完成的注册流程
+    /// </summary>
+    /// <param name="uid"></param>
+    /// <returns></returns>
+    public bool UserCompeteRegister(int uid)
+    {
+        /*userinfo表中是否已经有了相应的信息*/
+        string sql = "select count(*) from web.User where username = @username";
+        using (MySqlCommand sqlCommand = new MySqlCommand(sql,_d.GetConnection()))
+        {
+            sqlCommand.Parameters.AddWithValue("@username", uid);
+            if (Convert.ToInt32(sqlCommand.ExecuteScalar()) == 1)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
-
-    public RegisterStatus InsertUser(string username, string password)
+    
+    public RegisterStatus RegisterUser(string username, string password)
     {
         try
         {
@@ -45,8 +67,8 @@ public class UserService : IUserService
             password = PasswordHasher.HashPassword(password);
             
             /*查询是否存在相同的账号*/
-            string sql = "select count(*) from web.User where username = @username";
-            using (MySqlCommand sqlCommand = new MySqlCommand(sql,_connection))
+            string sql = "select count(*) from web.UserInfo where username = @username";
+            using (MySqlCommand sqlCommand = new MySqlCommand(sql,_d.GetConnection()))
             {
                 sqlCommand.Parameters.AddWithValue("@username", username);
                 if (Convert.ToInt32(sqlCommand.ExecuteScalar()) == 1)
@@ -57,7 +79,7 @@ public class UserService : IUserService
             
             Console.WriteLine(password.Length);
             sql = "insert into web.User(username, password) value(@username,@password)";
-            using (MySqlCommand sqlCommand = new MySqlCommand(sql,_connection))
+            using (MySqlCommand sqlCommand = new MySqlCommand(sql,_d.GetConnection()))
             {
                 sqlCommand.Parameters.AddWithValue("@username", username);
                 sqlCommand.Parameters.AddWithValue("@password", password);
@@ -76,11 +98,11 @@ public class UserService : IUserService
     {
         /*根据账号进行查询*/
         string sql = "select password from web.User where username = @username";
-        using (MySqlCommand sqlCommand = new MySqlCommand(sql,_connection))
+        using (MySqlCommand sqlCommand = new MySqlCommand(sql,_d.GetConnection()))
         {
             sqlCommand.Parameters.AddWithValue("@username", username);
             var result = Convert.ToString(sqlCommand.ExecuteScalar());
-            if (result == null)
+            if (String.IsNullOrEmpty(result))
             {
                 // 如果查询结果位null，说明不存在这个用户
                 return LoginStatus.UserNameError;

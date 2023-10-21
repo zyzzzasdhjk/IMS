@@ -8,7 +8,7 @@ public interface IUserService
     /// <param name="username"></param>
     /// <param name="password"></param>
     /// <returns></returns>
-    public RegisterStatus InsertUser(string username, string password);
+    public RegisterStatus RegisterUser(string username, string password);
 
     /// <summary>
     /// 用户登录

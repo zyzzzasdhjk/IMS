@@ -1,4 +1,6 @@
-﻿namespace IMS.Service.UserServices;
+﻿using IMS.Models;
+
+namespace IMS.Service.UserServices;
 
 public interface IUserService
 {
@@ -25,5 +27,12 @@ public interface IUserService
     /// <param name="password"></param>
     /// <returns></returns>
     public bool DeleteUser(string username, string password);
-    
+        
+    /// <summary>
+    /// 修改用户密码
+    /// </summary>
+    /// <param name="uid"></param>
+    /// <param name="password"></param>
+    /// <returns></returns>
+    public ReturnMessageModel ResetPassword(string uid, string password);
 }

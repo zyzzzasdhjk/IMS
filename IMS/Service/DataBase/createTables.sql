@@ -15,13 +15,19 @@ create table if not exists User
 CREATE TABLE IF NOT EXISTS UserInfo (
     uid INT PRIMARY KEY,
     name VARCHAR(20) NOT NULL,
-    gender ENUM('Male', 'Female', 'Other') NOT NULL,
+    gender ENUM('Male', 'Female', 'Other', 'Unknown') NOT NULL,
     birthday DATE,
     description TEXT,
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     foreign key (uid) references User(uid)
 );
+
+CREATE TRIGGER InsertUserInfo AFTER INSERT ON User
+FOR EACH ROW
+BEGIN
+    INSERT INTO UserInfo(uid, name, gender) VALUE (NEW.uid, NEW.username, 'Unknown');
+END ;
 
 -- 团队信息表
 CREATE TABLE IF NOT EXISTS TeamInfo(

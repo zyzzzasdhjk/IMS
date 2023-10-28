@@ -36,6 +36,10 @@ public class UserController : Controller
         {
             return Json(new ReturnMessageModel("密码错误"));
         }
+        else if (ls == LoginStatus.UserBanned)
+        {
+            return Json(new ReturnMessageModel("账号已被封禁"));
+        }
         else
         {
             return Json(new ReturnMessageModel("账号不存在"));

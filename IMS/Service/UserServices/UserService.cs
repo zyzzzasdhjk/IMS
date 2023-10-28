@@ -1,7 +1,9 @@
 ﻿using System.Text.RegularExpressions;
+using IMS.Models;
 using IMS.Service.DataBase;
 using Microsoft.AspNetCore.Mvc.Razor;
 using MySql.Data.MySqlClient;
+using Newtonsoft.Json.Linq;
 
 namespace IMS.Service.UserServices;
 
@@ -24,26 +26,29 @@ public class UserService : IUserService
     {
         return Regex.IsMatch(password, @"^(?![a-zA-Z]+$)(?!\d+$)(?![^\da-zA-Z\s]+$).{8,}$");
     }
-    
-    /// <summary>
-    /// 判断用户是否完成的注册流程
-    /// </summary>
-    /// <param name="uid"></param>
-    /// <returns></returns>
-    public bool UserCompeteRegister(int uid)
+
+    public ReturnMessageModel UpdateUser(JObject user)
     {
-        /*userinfo表中是否已经有了相应的信息*/
-        string sql = "select count(*) from web.User where username = @username";
+        string sql = "UPDATE USERINFO SET " +
+                     "name = @name,description = @description," +
+                     "gender = @gender,birthday = @birthday " +
+                     "WHERE uid = @uid";
         using (MySqlCommand sqlCommand = new MySqlCommand(sql,_d.GetConnection()))
         {
-            sqlCommand.Parameters.AddWithValue("@username", uid);
-            if (Convert.ToInt32(sqlCommand.ExecuteScalar()) == 1)
+            sqlCommand.Parameters.AddWithValue("@name", user["name"]);
+            sqlCommand.Parameters.AddWithValue("@description", user["description"]);
+            sqlCommand.Parameters.AddWithValue("@gender", user["gender"]);
+            sqlCommand.Parameters.AddWithValue("@birthday", user["birthday"]);
+            int num = sqlCommand.ExecuteNonQuery();
+            if (num == 1)
             {
-                return true;
+                return new ReturnMessageModel();
+            }
+            else
+            {
+                return new ReturnMessageModel("错误!");
             }
         }
-
-        return false;
     }
 
     
@@ -67,7 +72,7 @@ public class UserService : IUserService
             password = PasswordHasher.HashPassword(password);
             
             /*查询是否存在相同的账号*/
-            string sql = "select count(*) from web.UserInfo where username = @username";
+            string sql = "select count(*) from web.User where username = @username";
             using (MySqlCommand sqlCommand = new MySqlCommand(sql,_d.GetConnection()))
             {
                 sqlCommand.Parameters.AddWithValue("@username", username);
@@ -97,18 +102,22 @@ public class UserService : IUserService
     public LoginStatus LoginUser(string username, string password)
     {
         /*根据账号进行查询*/
-        string sql = "select password from web.User where username = @username";
+        string sql = "select password,status from web.User where username = @username";
         using (MySqlCommand sqlCommand = new MySqlCommand(sql,_d.GetConnection()))
         {
             sqlCommand.Parameters.AddWithValue("@username", username);
-            var result = Convert.ToString(sqlCommand.ExecuteScalar());
-            if (String.IsNullOrEmpty(result))
+            var result = sqlCommand.ExecuteReader();
+            if (!result.HasRows)
             {
                 // 如果查询结果位null，说明不存在这个用户
                 return LoginStatus.UserNameError;
             }
-            
-            if (!PasswordHasher.CheckPassword(password,result))
+            result.Read();
+            if (result.GetValue(1).ToString() != "Normal")
+            {
+                return LoginStatus.UserBanned;
+            }
+            if (!PasswordHasher.CheckPassword(password,result.GetValue(0).ToString()))
             {
                 return LoginStatus.PasswordError;
             }
@@ -120,5 +129,10 @@ public class UserService : IUserService
     public bool DeleteUser(string username, string password)
     {
         return true;
+    }
+
+    public ReturnMessageModel ResetPassword(string uid, string password)
+    {
+        throw new NotImplementedException();
     }
 }

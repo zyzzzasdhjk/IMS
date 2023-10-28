@@ -18,6 +18,12 @@ public class UserTest
     [Test]
     public void LoginTest()
     {
-        Console.WriteLine(_u.LoginUser("123", "123"));
+        Console.WriteLine(_u.LoginUser("123456", "123"));
+    }
+
+    [Test]
+    public void RegisterTest()
+    {
+        Console.WriteLine(_u.RegisterUser("zy","123456abc"));
     }
 }

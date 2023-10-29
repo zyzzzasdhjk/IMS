@@ -8,7 +8,7 @@ create table if not exists User
     password   varchar(69) not null,
     created_at DATETIME   default CURRENT_TIMESTAMP null,
     updated_at DATETIME   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    status     enum ('Normal', 'Banned', 'Deleted') default 'Normal' not null
+    status     enum ('Normal', 'Banned', 'Deleted', 'UnConfirmed') default 'Normal' not null
 );
 
 -- 用户信息表
@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS UserInfo (
     gender ENUM('Male', 'Female', 'Other', 'Unknown') NOT NULL,
     birthday DATE,
     description TEXT,
+    email VARCHAR(20) not null comment '用户的邮箱',
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
     foreign key (uid) references User(uid)
 );
 

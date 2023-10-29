@@ -27,6 +27,12 @@ public class ReturnMessageModel
         Status = true;
         Message = null;
     }
+
+    public ReturnMessageModel(bool s, string message)
+    {
+        Status = s;
+        Message = message;
+    }
     
     public override string ToString()
     {

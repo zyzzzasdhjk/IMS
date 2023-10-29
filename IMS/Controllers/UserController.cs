@@ -52,10 +52,10 @@ public class UserController : Controller
         {
             return Json(new ReturnMessageModel("账号或者密码不能为空"));
         }
-        RegisterStatus rs = _u.RegisterUser(user.Username, user.Password);
+        RegisterStatus rs = _u.RegisterUser(user.Username, user.Password, user.Email);
         if (rs == RegisterStatus.Success)
         {
-            return Json(new ReturnMessageModel());
+            return Json(new ReturnMessageModel(true,"请输入你获取的验证码"));
         }
         else if (rs == RegisterStatus.UsernameInvalid)
         {
@@ -64,6 +64,10 @@ public class UserController : Controller
         else if (rs == RegisterStatus.UsernameExist)
         {
             return Json(new ReturnMessageModel("用户名已存在"));
+        }
+        else if(rs == RegisterStatus.EmailError)
+        {
+            return Json(new ReturnMessageModel("邮箱地址错误"));
         }
         else if (rs == RegisterStatus.PasswordInvalid)
         {

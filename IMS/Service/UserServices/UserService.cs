@@ -1,15 +1,24 @@
 ﻿using System.Text.RegularExpressions;
 using IMS.Models;
 using IMS.Service.DataBase;
-using Microsoft.AspNetCore.Mvc.Razor;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json.Linq;
 
 namespace IMS.Service.UserServices;
 
+class CheckCode
+{
+    public string Usename { get; set; }
+    public DateTime Time { get; set; }
+}
+
 public class UserService : IUserService
 {
     private IRelationalDataBase _d;
+    private Dictionary<int,CheckCode> _changePwdCheckCodes= 
+        new Dictionary<int,CheckCode>(); // 存储用户更改密码的令牌
+    private Dictionary<int,CheckCode> _registerCheckCodes = 
+        new Dictionary<int,CheckCode>(); // 存储用户注册时候的令牌
 
     public UserService(IRelationalDataBase database)
     {
@@ -51,8 +60,7 @@ public class UserService : IUserService
         }
     }
 
-    
-    public RegisterStatus RegisterUser(string username, string password)
+    public RegisterStatus RegisterUser(string username, string password ,string email)
     {
         try
         {
@@ -82,8 +90,7 @@ public class UserService : IUserService
                 }
             }
             
-            Console.WriteLine(password.Length);
-            sql = "insert into web.User(username, password) value(@username,@password)";
+            sql = "insert into web.User(username, password, status) value (@username,@password,'UnConfirmed')";
             using (MySqlCommand sqlCommand = new MySqlCommand(sql,_d.GetConnection()))
             {
                 sqlCommand.Parameters.AddWithValue("@username", username);
@@ -91,11 +98,72 @@ public class UserService : IUserService
                 sqlCommand.ExecuteNonQuery();
             }
 
+            // 如果上面的验证都通过了,生成一个随机的校验码
+            var r = new Random();
+            var checkCode = r.Next(100000000, 999999999); // 生成一个随机的校验码
+            if (EmailService.SendEmail(email , "激活邮件",
+                    String.Format("你的验证码为{0}，有效时间为30分钟，请尽快激活。",checkCode)))
+            {
+                _registerCheckCodes.Add(checkCode, 
+                    new CheckCode() { Usename = username, Time = DateTime.Now });
+            }
+            else
+            {
+                return RegisterStatus.EmailError;
+            }
             return RegisterStatus.Success;
         }
         catch (Exception e)
         {
             return RegisterStatus.PasswordInvalid;
+        }
+    }
+    
+    public ReturnMessageModel ResendEmail(string username ,string email)
+    {
+        // 如果上面的验证都通过了,生成一个随机的校验码
+        var r = new Random();
+        var checkCode = r.Next(100000000, 999999999); // 生成一个随机的校验码
+        if (EmailService.SendEmail(email , "激活邮件",
+                String.Format("你的验证码为{0}，有效时间为30分钟，请尽快激活。",checkCode)))
+        {
+            _registerCheckCodes.Add(checkCode, 
+                new CheckCode() { Usename = username, Time = DateTime.Now });
+        }
+        else
+        {
+            return new ReturnMessageModel("邮件发送错误");
+        }
+        return new ReturnMessageModel();
+    }
+
+    public ReturnMessageModel ConfirmUser(string username ,int checkCode)
+    {
+        if (!_registerCheckCodes.ContainsKey(checkCode) || // 如果没有这个验证码
+            username != _registerCheckCodes[checkCode].Usename) // 如果不是当前用户的校验码
+        {
+            return new ReturnMessageModel("验证码错误");
+        }
+
+        if (DateTime.Now - _registerCheckCodes[checkCode].Time > TimeSpan.FromMinutes(30)) // 如果超过10分钟
+        {
+            _registerCheckCodes.Remove(checkCode); // 过期则删除
+            return new ReturnMessageModel("验证码已过期");
+        }
+        _registerCheckCodes.Remove(checkCode); // 验证成功删除验证码
+        string sql = "update web.User set status = 'Normal' where username = @username";
+        using (MySqlCommand sqlCommand = new MySqlCommand(sql,_d.GetConnection()))
+        {
+            sqlCommand.Parameters.AddWithValue("@username", username);
+            var changeRow = sqlCommand.ExecuteNonQuery();
+            if (changeRow == 1)
+            {
+                return new ReturnMessageModel();
+            }
+            else
+            {
+                return new ReturnMessageModel("后端错误");
+            }
         }
     }
 
@@ -121,7 +189,7 @@ public class UserService : IUserService
             {
                 return LoginStatus.PasswordError;
             }
-
+            result.Close();
             return LoginStatus.Success;
         }
     }

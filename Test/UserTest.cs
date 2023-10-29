@@ -24,6 +24,13 @@ public class UserTest
     [Test]
     public void RegisterTest()
     {
-        Console.WriteLine(_u.RegisterUser("zy","123456abc"));
+        Console.WriteLine(_u.RegisterUser("zy","123456abc","1"));
+    }
+
+    [Test]
+    public void EmailTest()
+    {
+        EmailService e = new EmailService();
+        EmailService.SendEmail("2075221336@qq.com", "这是测试邮件", "邮件内容");
     }
 }

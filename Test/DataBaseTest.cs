@@ -18,6 +18,6 @@ public class DataBaseTest
     [Test]
     public void TestUserInsert()
     { 
-        Console.WriteLine(_u.RegisterUser("admin", "123456"));
+        /*Console.WriteLine(_u.RegisterUser("admin", "123456"));*/
     }
 }

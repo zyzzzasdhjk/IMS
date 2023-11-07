@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using IMS.Data;
 using IMS.Service.DataBase;
+using IMS.Service.TeamServices;
 using IMS.Service.UserServices;
 using Microsoft.AspNetCore.Authentication;
 
@@ -19,7 +20,9 @@ builder.Services.AddControllersWithViews();
 
 // IOC
 builder.Services.AddSingleton<IRelationalDataBase, MysqlDataBase>();
+builder.Services.AddSingleton<INosqlDataBase, MongoDataBase>();
 builder.Services.AddSingleton<IUserService, UserService>();
+builder.Services.AddSingleton<ITeamSqlService, TeamMysqlService>();
 
 // CORS 跨域
 builder.Services.AddCors(policy =>

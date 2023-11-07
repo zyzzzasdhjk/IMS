@@ -1,4 +1,5 @@
 ﻿using IMS.Models;
+using IMS.Models.User;
 
 namespace IMS.Service.UserServices;
 
@@ -10,7 +11,7 @@ public interface IUserService
     /// <param name="username"></param>
     /// <param name="password"></param>
     /// <returns></returns>
-    public RegisterStatus RegisterUser(string username, string password, string email);
+    public UserRegisterReturnModel RegisterUser(string username, string password, string email);
 
     /// <summary>
     /// 用户登录
@@ -18,7 +19,7 @@ public interface IUserService
     /// <param name="username"></param>
     /// <param name="password"></param>
     /// <returns></returns>
-    public LoginStatus LoginUser(string username, string password);
+    public UserLoginReturnModel LoginUser(string username, string password);
 
     /// <summary>
     /// 删除用户
@@ -29,11 +30,12 @@ public interface IUserService
     public bool DeleteUser(string username, string password);
 
     /// <summary>
-    /// 校验用户的验证码
+    /// 验证用户邮箱
     /// </summary>
+    /// <param name="uid"></param>
     /// <param name="checkCode"></param>
     /// <returns></returns>
-    public ReturnMessageModel ConfirmUser(string username ,int checkCode);
+    public UserConfirmReturnModel ConfirmUser(int uid ,int checkCode);
 
     /// <summary>
     /// 重新发送验证邮件

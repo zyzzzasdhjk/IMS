@@ -39,7 +39,6 @@ public class EmailService
         mailMessage.BodyEncoding = Encoding.UTF8;//设置发送邮件得编码
         mailMessage.IsBodyHtml = false;//设置标题是否为HTML格式
         mailMessage.Priority = MailPriority.Normal;//设置邮件发送优先级
-        
         try
         {
             smtpClient.Send(mailMessage);
@@ -48,6 +47,7 @@ public class EmailService
         }
         catch (SmtpException ex)
         {
+            Console.WriteLine(ex);
             return false;
         }
     }

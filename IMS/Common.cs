@@ -12,7 +12,8 @@ public class EmailSetting
 
 public class Common
 {
-    public static string? ConnectString = null;
+    public static readonly string MysqlConnectString;
+    public static readonly string MongoDBConnectString;
     public static EmailSetting EmailServiceSetting { get; set; } = new EmailSetting();
     static Common ()
     {
@@ -25,9 +26,14 @@ public class Common
             {
                 JObject j = (JObject)JToken.ReadFrom(reader);
                 
-                // 数据库连接字符串
-                JObject dataBaseObject = (JObject)j["DataBase"];
-                ConnectString = String.Format("Database={0};Data Source={1};port={2};User Id={3};;SslMode=none;Password={4};",dataBaseObject["database"], dataBaseObject["address"], dataBaseObject["port"], dataBaseObject["username"], dataBaseObject["password"]);
+                // Mysql数据库连接字符串
+                JObject mysqlSetting = (JObject)j["Mysql"];
+                MysqlConnectString = String.Format("Database={0};Data Source={1};port={2};User Id={3};;SslMode=none;Password={4};",mysqlSetting["database"], mysqlSetting["address"], mysqlSetting["port"], mysqlSetting["username"], mysqlSetting["password"]);
+                /*ConnectString = j["DataBase"].ToString();*/
+                
+                // MongoDB数据库连接字符串
+                JObject mongoDBSetting = (JObject)j["MongoDB"];
+                MongoDBConnectString = String.Format("mongodb://{0}:{1}", mongoDBSetting["address"], mongoDBSetting["port"]);
                 /*ConnectString = j["DataBase"].ToString();*/
                 
                 // 邮箱服务器连接字符串

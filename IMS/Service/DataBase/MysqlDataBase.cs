@@ -17,7 +17,7 @@ public class MysqlDataBase : IRelationalDataBase
             + "User Id=CSuper;;SslMode=none;Password=76dfiu*T&,f+-&*UF;");*/
 
         MySqlConnection connection = new MySqlConnection(
-            Common.ConnectString
+            Common.MysqlConnectString
         );
         _connection = connection;
         _connection.Open();

@@ -12,7 +12,8 @@ public class UserTest
     public void Setup()
     {
         _r = new MysqlDataBase();
-        _u = new UserService(_r);
+        var m = new MongoDataBase();
+        _u = new UserService(_r,m);
     }
 
     [Test]
@@ -31,6 +32,6 @@ public class UserTest
     public void EmailTest()
     {
         EmailService e = new EmailService();
-        EmailService.SendEmail("2075221336@qq.com", "这是测试邮件", "邮件内容");
+        EmailService.SendEmail("2075221336@qq.com", "这是测试邮件", "邮件内容是\n原神，启动！");
     }
 }

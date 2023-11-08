@@ -1,4 +1,6 @@
-﻿using MongoDB.Bson;
+﻿using System.Security.Cryptography;
+using System.Text;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace IMS.Service.DataBase;
@@ -11,8 +13,6 @@ public interface INosqlDataBase
     /// <returns></returns>
     public IMongoCollection<BsonDocument> GetUserCollectionBase();
 
-    public IMongoCollection<MongoDataBase.UserRegisterConfirmCode> GetUserConfirmCodeCollection();
-    
     /// <summary>
     /// 向集合中插入用户的验证码
     /// </summary>
@@ -35,4 +35,43 @@ public interface INosqlDataBase
     /// <param name="uid"></param>
     /// <returns></returns>
     public bool ExistUserConfirmCode(int uid);
+
+    /// <summary>
+    /// 向集合中添加用户的认证码
+    /// </summary>
+    /// <param name="uid"></param>
+    /// <param name="code"></param>
+    /// <returns></returns>
+    public bool AddUserAuthenticationCode(int uid, string code);
+    
+    /// <summary>
+    /// 判断用户认证码是否存在，如果存在的话，返回用户的uid，不然则返回-1
+    /// </summary>
+    /// <param name="uid"></param>
+    /// <returns></returns>
+    public int ValidateUserAuthenticationCode(string code);
+    
+    /// <summary>
+    /// 根据uid，密码和当前时间生成校验码
+    /// </summary>
+    /// <param name="uid"></param>
+    /// <param name="password"></param>
+    /// <returns></returns>
+    public static string GenerateUserAuthenticationCode(int uid, string password)
+    {
+        // 获取当前时间的UTC格式
+        DateTime currentTime = DateTime.UtcNow;
+        // 把当前时间转换为字符串
+        string timeString = currentTime.ToString("yyyyMMddHHmmss");
+        // 把uid，密码和时间字符串拼接起来
+        string input = uid.ToString() + password + timeString;
+        // 创建一个SHA256实例
+        SHA256 sha256 = SHA256.Create();
+        // 计算输入的哈希值
+        byte[] hashValue = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+        // 把哈希值转换为十六进制字符串
+        string authenticationCode = BitConverter.ToString(hashValue).Replace("-", "");
+        // 返回校验码
+        return authenticationCode;
+    }
 }

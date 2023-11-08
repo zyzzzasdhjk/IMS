@@ -13,15 +13,13 @@ public class UserLoginReturnModel
 {
     public UserLoginReturnStatus Code { get; set; } = UserLoginReturnStatus.Success;
     public string? Message { get; set; }
+    public string AuthenticationCode { get; set; } = "";
+    public int Uid { get; set; }
 
     public UserLoginReturnModel(UserLoginReturnStatus s)
     {
         switch (s)
         {
-            case UserLoginReturnStatus.Success:
-                Code = UserLoginReturnStatus.Success;
-                Message = "登录成功！";
-                break;
             case UserLoginReturnStatus.UsernameOrPasswordError:
                 Code = UserLoginReturnStatus.UsernameOrPasswordError;
                 Message = "账号或者密码错误！";
@@ -39,5 +37,12 @@ public class UserLoginReturnModel
                 Message = "账号未激活！";
                 break;
         }
+    }
+
+    public UserLoginReturnModel(int uid,string authenticationCode)
+    {
+        Message = "登录成功！";
+        AuthenticationCode = authenticationCode;
+        Uid = uid;
     }
 }

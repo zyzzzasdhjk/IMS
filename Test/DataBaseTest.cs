@@ -26,7 +26,8 @@ public class DataBaseTest
         /*Console.WriteLine(_m.GetUserConfirmCodeCollection().
             Find(Builders<MongoDataBase.UserRegisterConfirmCode>.Filter.Eq("CheckCode",749559721)).Any());
     */
-        Console.WriteLine(_m.ValidateUserConfirmCode(36,749559721));
+        /*Console.WriteLine(_m.ValidateUserAuthenticationCode("asd"));*/
+        _m.AddUserConfirmCode(1, 123456);
     }
     
     [Test]

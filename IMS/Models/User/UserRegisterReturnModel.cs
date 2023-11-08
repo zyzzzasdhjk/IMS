@@ -15,15 +15,12 @@ public class UserRegisterReturnModel
 {
     public UserRegisterReturnStatus Code { get; set; } = UserRegisterReturnStatus.Success;
     public string? Message { get; set; }
+    public int Uid { get; set; }
 
     public UserRegisterReturnModel(UserRegisterReturnStatus s)
     {
         switch (s)
         {
-            case UserRegisterReturnStatus.Success:
-                Code = UserRegisterReturnStatus.Success;
-                Message = "注册成功！";
-                break;
             case UserRegisterReturnStatus.UserNameRepeat:
                 Code = UserRegisterReturnStatus.UserNameRepeat;
                 Message = "用户名重复！";
@@ -53,5 +50,11 @@ public class UserRegisterReturnModel
                 Message = "注册成功！";
                 break;
         }
+    }
+
+    public UserRegisterReturnModel(int uid)
+    {
+        Uid = uid;
+        Message = "注册成功！";
     }
 }

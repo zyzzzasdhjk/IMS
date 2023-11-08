@@ -9,7 +9,7 @@ namespace IMS.Service.UserServices;
 
 class CheckCode
 {
-    public string Usename { get; set; } = "";
+    public string Username { get; set; } = "";
     public DateTime Time { get; set; }
 }
 
@@ -143,8 +143,8 @@ public class UserService : IUserService
         {
             return new UserRegisterReturnModel(UserRegisterReturnStatus.EmailError);
         }
-
-        return new UserRegisterReturnModel(UserRegisterReturnStatus.Success);
+        
+        return new UserRegisterReturnModel(uid);
     }
 
     public ReturnMessageModel ResendEmail(string username, string email)
@@ -156,7 +156,7 @@ public class UserService : IUserService
                 String.Format("你的验证码为{0}，有效时间为30分钟，请尽快激活。", checkCode)))
         {
             _registerCheckCodes.Add(checkCode,
-                new CheckCode() { Usename = username, Time = DateTime.Now });
+                new CheckCode() { Username = username, Time = DateTime.Now });
         }
         else
         {
@@ -201,7 +201,7 @@ public class UserService : IUserService
     public UserLoginReturnModel LoginUser(string username, string password)
     {
         /*根据账号进行查询*/
-        const string sql = "select password,status from web.User where username = @username";
+        const string sql = "select uid,password,status from web.User where username = @username";
         using (var sqlCommand = new MySqlCommand(sql, _d.GetConnection()))
         {
             sqlCommand.Parameters.AddWithValue("@username", username);
@@ -214,8 +214,9 @@ public class UserService : IUserService
             }
 
             result.Read();
-            var userStatus = result.GetValue(1).ToString();
-            var userPassword = result.GetValue(0).ToString();
+            var uid = Convert.ToInt32(result.GetValue(0));  // 用户ID
+            var userPassword = result.GetValue(1).ToString(); // 用户密码
+            var userStatus = result.GetValue(2).ToString(); // 用户状态
             result.Close(); // 及时关闭，防止出现未关闭错误
 
             switch (userStatus)
@@ -235,8 +236,11 @@ public class UserService : IUserService
             {
                 return new UserLoginReturnModel(UserLoginReturnStatus.UsernameOrPasswordError);
             }
-
-            return new UserLoginReturnModel(UserLoginReturnStatus.Success);
+            
+            /*生成用户认证码，用于后面的认证*/
+            var authenticationCode = INosqlDataBase.GenerateUserAuthenticationCode(uid,password);
+            _m.AddUserAuthenticationCode(uid, authenticationCode);
+            return new UserLoginReturnModel(uid,authenticationCode);
         }
     }
 

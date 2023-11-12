@@ -1,4 +1,6 @@
-﻿namespace IMS.Models;
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace IMS.Models;
 
 public enum AuthorizationReturnStatus
 {
@@ -6,14 +8,21 @@ public enum AuthorizationReturnStatus
     NonAuthorization = 1, // 未检测到登录信息
 }
 
+
 public class AuthorizationReturnModel
 {
-    AuthorizationReturnStatus Code { get; set; } = AuthorizationReturnStatus.Success;
+    public AuthorizationReturnStatus Code { get; set; }
     public object? Message { get; set; }
 
-    AuthorizationReturnModel(AuthorizationReturnStatus s, object? m)
+    public AuthorizationReturnModel(object? m)
     {
-        Code = s;
+        Code = AuthorizationReturnStatus.Success;
         Message = m;
+    }
+
+    public AuthorizationReturnModel()
+    {
+        Code = AuthorizationReturnStatus.NonAuthorization;
+        Message = "已拒绝未知用户的访问请求";
     }
 }

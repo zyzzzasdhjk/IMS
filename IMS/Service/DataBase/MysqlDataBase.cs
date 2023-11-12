@@ -36,4 +36,17 @@ public class MysqlDataBase : IRelationalDataBase
         }
         return _connection;
     }
+
+    public bool IsUserStatusNormal(int uid)
+    {
+        var c = GetConnection();
+        const string sql = "select count(*) from web.User " +
+                           "where uid = @uid and  status = 'Normal'";
+        using (var sqlCommand = new MySqlCommand(sql, c))
+        {
+            sqlCommand.Parameters.AddWithValue("@uid", uid);
+            var result = sqlCommand.ExecuteScalar();
+            return Convert.ToInt32(result) > 0;
+        }
+    }
 }

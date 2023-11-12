@@ -47,7 +47,7 @@ public interface INosqlDataBase
     /// <summary>
     /// 判断用户认证码是否存在，如果存在的话，返回用户的uid，不然则返回-1
     /// </summary>
-    /// <param name="uid"></param>
+    /// <param name="code"></param>
     /// <returns></returns>
     public int ValidateUserAuthenticationCode(string code);
     

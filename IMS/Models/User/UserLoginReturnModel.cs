@@ -14,7 +14,7 @@ public class UserLoginReturnModel
     public UserLoginReturnStatus Code { get; set; } = UserLoginReturnStatus.Success;
     public string? Message { get; set; }
     public string AuthenticationCode { get; set; } = "";
-    public int Uid { get; set; }
+    public int Uid { get; set; } = -1;
 
     public UserLoginReturnModel(UserLoginReturnStatus s)
     {

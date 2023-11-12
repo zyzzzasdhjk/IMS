@@ -36,6 +36,14 @@ public interface IUserService
     /// <param name="checkCode"></param>
     /// <returns></returns>
     public UserConfirmReturnModel ConfirmUser(int uid ,int checkCode);
+    
+    /// <summary>
+    /// 判断用户是否已经获得了授权
+    /// </summary>
+    /// <param name="uid"></param>
+    /// <param name="code"></param>
+    /// <returns></returns>
+    public bool IsAuthorization(int uid, string code);
 
     /// <summary>
     /// 重新发送验证邮件

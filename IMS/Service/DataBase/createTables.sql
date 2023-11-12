@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS TeamInfo(
     tid INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(20) NOT NULL ,
     description TEXT, -- 描述
-    peopleMaxNum TINYINT default 20,  -- 团队最大人数上限
+    PeopleNumber int default 1, -- 人数,创建的时候只有创建者一个人
     JoinCode VARCHAR(9), -- 加入码
     status ENUM('Normal','Banned','Deleted') default 'Normal' , -- 团队的状态
     created_at DATETIME   default CURRENT_TIMESTAMP null,
@@ -55,8 +55,29 @@ CREATE TABLE IF NOT EXISTS TeamMember(
 
 -- 团队角色视图
 CREATE VIEW TeamMemberView AS
-    SELECT T.tid, U.name, role, T.created_at, updated_at
+    SELECT T.tid, U.uid ,U.name, role, T.created_at, updated_at
     FROM TeamMember AS T LEFT JOIN UserInfo AS U ON T.uid = U.uid;
+
+-- 用户团队视图
+CREATE VIEW UserTeamsView AS
+    SELECT TM.uid, TM.tid, TI.name,TI.description,TI.status,TI.PeopleNumber
+    FROM TeamMember AS TM LEFT JOIN TeamInfo TI on TM.tid = TI.tid;
+
+-- 用户创建团队
+CREATE PROCEDURE UserCreateTeam(IN n varchar(20), IN d text,IN j varchar(9),IN u int,OUT msg INT)
+BEGIN
+    IF EXISTS(SELECT * FROM TeamInfo WHERE JoinCode = j) THEN -- 判断是否存在相同的加入码
+        SET msg = 1; -- 代表加入码重复
+    ELSE
+        IF j = '' THEN
+            INSERT INTO TeamInfo (name, description) VALUES (n, d);
+        ELSE
+            INSERT INTO TeamInfo (name, description, JoinCode) VALUES (n, d,j);
+        END IF;
+        INSERT INTO TeamMember (tid, uid, role) VALUES (LAST_INSERT_ID(), u, 'Creator');
+        SET msg = 0; 
+    END IF;
+END;
 
 -- 任务表
 CREATE TABLE TaskInfo(

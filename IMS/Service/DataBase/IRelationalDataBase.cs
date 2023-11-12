@@ -9,4 +9,11 @@ public interface IRelationalDataBase
     /// </summary>
     /// <returns></returns>
     public MySqlConnection GetConnection();
+
+    /// <summary>
+    /// 判断用户的状态是否正常
+    /// </summary>
+    /// <param name="uid"></param>
+    /// <returns></returns>
+    public bool IsUserStatusNormal(int uid);
 }

@@ -18,9 +18,6 @@ public class UserService : IUserService
     private IRelationalDataBase _d;
     private INosqlDataBase _m; // 非关系型数据库
 
-    private Dictionary<int, CheckCode> _changePwdCheckCodes =
-        new Dictionary<int, CheckCode>(); // 存储用户更改密码的令牌
-
     private Dictionary<int, CheckCode> _registerCheckCodes =
         new Dictionary<int, CheckCode>(); // 存储用户注册时候的令牌
 
@@ -65,6 +62,21 @@ public class UserService : IUserService
         }
     }
 
+    public bool IsAuthorization(int uid, string code)
+    {
+        if (code == "AuthorizationTest")
+        {
+            return true;
+        } // 测试用，上线时要删除
+        var u = _m.ValidateUserAuthenticationCode(code);
+        if (u != -1 && u == uid)
+        {
+            return true;
+        }
+
+        return false;
+    }
+    
     public UserRegisterReturnModel RegisterUser(string username, string password, string email)
     {
         /*判断用户名字是否过长或者为空*/
@@ -223,7 +235,7 @@ public class UserService : IUserService
             {
                 case "Banned":
                     return new UserLoginReturnModel(UserLoginReturnStatus.UserBanned);
-                case "Unconfirmed":
+                case "UnConfirmed":
                     return new UserLoginReturnModel(UserLoginReturnStatus.UserUnconfirmed);
             }
 

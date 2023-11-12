@@ -1,15 +1,20 @@
-﻿using IMS.Service.TeamServices;
+﻿using IMS.Models;
+using IMS.Models.Team;
+using IMS.Service.TeamServices;
+using IMS.Service.UserServices;
 
 namespace IMS.Controllers;
 using Microsoft.AspNetCore.Mvc;
 
 public class TeamController : Controller
 {
-    private ITeamSqlService _t;
+    private readonly ITeamSqlService _t;
+    private readonly IUserService _u;
 
-    public TeamController(ITeamSqlService t)
+    public TeamController(ITeamSqlService t,IUserService u)
     {
         _t = t;
+        _u = u;
     }
     
     public JsonResult Index()
@@ -20,13 +25,46 @@ public class TeamController : Controller
     }
 
     // 获得用户所有的团队
-    public JsonResult GetUserTeams(Object user)
+    public JsonResult GetUserTeams([FromBody] UidRequestModel u, [FromHeader] string authorization)
     {
-        return Json(_t.GetAllMembers(Convert.ToInt32(user)));
+        if (_u.IsAuthorization(u.Uid,authorization))
+        {
+            return Json(new AuthorizationReturnModel(_t.GetUserTeams(u.Uid)));
+        }
+
+        return Json(new AuthorizationReturnModel());
     }
 
-    public bool AddTeamMember(Object user, Object team)
+    public JsonResult UserCreateTeam([FromBody] UserCreateTeamRequestModel u, [FromHeader] string authorization)
     {
-        return _t.AddMember(Convert.ToInt32(user), Convert.ToInt32(team));
+        if (_u.IsAuthorization(u.Uid,authorization))
+        {
+            return Json(new AuthorizationReturnModel(
+                new UserCreateTeamResponseModel(
+                    _t.UserCreateTeam(u.Uid,u.Name,u.Description,u.JoinCode)
+                    )));
+        }
+        return Json(new AuthorizationReturnModel());
     }
+    
+    // 任命一个用户
+    /// <summary>
+    /// 更改用户的身份或者是删除用户
+    /// </summary>
+    /// <param name="u"></param>
+    /// <param name="authorization"></param>
+    /// <returns></returns>
+    public JsonResult UserAppoint([FromBody] UserAppointRequestModel u, [FromHeader] string authorization)
+    {
+        if (_u.IsAuthorization(u.Uid,authorization))
+        {
+            return Json(new AuthorizationReturnModel(
+                new UserAppointResponseModel(
+                    _t.UserAppoint(u.CommandUid,u.Uid,u.Tid,u.Role)
+                )));
+        }
+        return Json(new AuthorizationReturnModel());
+    }
+    
+    
 }

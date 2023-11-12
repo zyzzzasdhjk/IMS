@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 
 namespace IMS.Service.DataBase;
@@ -10,6 +11,7 @@ public class MongoDataBase : INosqlDataBase
     /// <summary>
     /// 验证码模型
     /// </summary>
+    [BsonIgnoreExtraElements]
     private class UserCode
     {
         public int Uid;
@@ -59,7 +61,7 @@ public class MongoDataBase : INosqlDataBase
     /// <returns></returns>
     private IMongoCollection<UserCode> GetUserAuthenticationCodeCollection()
     {
-        return _d.GetCollection<UserCode>("UserRegisterConfirm");
+        return _d.GetCollection<UserCode>("UserAuthentication");
     }
 
     /// <summary>
@@ -117,7 +119,11 @@ public class MongoDataBase : INosqlDataBase
     {
         try
         {
+            /*如果用户登录，应该要先删除掉集合内以及存在的认证码，以更新持续时间*/
             var authenticationCode = GetUserAuthenticationCodeCollection();
+            /*找到并且删除掉原有的认证码*/
+            authenticationCode.FindOneAndDelete(
+                Builders<UserCode>.Filter.Eq("Uid", uid));
             authenticationCode.InsertOne(new UserCode(uid,code));
             return true;
         }

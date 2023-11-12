@@ -51,7 +51,7 @@ public class UserController : Controller
     /// </summary>
     /// <param name="r"></param>
     /// <returns></returns>
-    public JsonResult Confirm([FromBody] RegisterConfirm r)
+    public JsonResult Confirm([FromBody] UserRegisterConfirmRequestModel r)
     {
         return Json(_u.ConfirmUser(r.Uid, r.CheckCode));
     }

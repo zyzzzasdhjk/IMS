@@ -85,9 +85,9 @@ CREATE TABLE TaskInfo(
     name varchar(20),
     description text,
     status enum('Incomplete','Complete','Timeout','Abandon'),
-    proportion int, -- 分值，用于计算总的进度和当前进度
+    -- proportion int, -- 分值，用于计算总的进度和当前进度
     created_at DATETIME   default CURRENT_TIMESTAMP null,
-    end_at DATETIME, -- 预计的完成时间
+    end_at DATETIME, -- 预计的完成时间,如果是null的话，就代表是没有结束时间限制
     updated_at DATETIME   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP
 );
 

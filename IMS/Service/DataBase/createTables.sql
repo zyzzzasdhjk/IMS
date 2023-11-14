@@ -79,6 +79,30 @@ BEGIN
     END IF;
 END;
 
+-- 用户删除团队，需要鉴定权限
+CREATE PROCEDURE UserDeleteTeam(IN u int,IN t int,OUT msg INT)
+BEGIN
+    IF EXISTS(SELECT * FROM TeamMember WHERE uid = u AND tid = t AND role = 'Creator') THEN
+        UPDATE TeamInfo SET status = 'Deleted' WHERE tid = t;
+        UPDATE TeamMember SET  role = 'Deleted' WHERE tid = t; -- 删除掉团队中全部用户的信息
+        SET msg = 0;
+    ELSE
+        SET msg = 1;
+    END IF;
+END;
+
+-- 用户查询团队成员
+CREATE PROCEDURE UserGetTeamMembers(IN u int,IN t int,OUT msg INT)
+BEGIN
+    IF EXISTS(SELECT * FROM TeamMember WHERE uid = u AND tid = t) THEN
+        SELECT role FROM TeamMember WHERE uid = u AND tid = t;
+        SET msg = 0;
+    ELSE
+        SET msg = 1;
+    END IF;
+END;
+
+
 -- 任务表
 CREATE TABLE TaskInfo(
     taskId int primary key ,

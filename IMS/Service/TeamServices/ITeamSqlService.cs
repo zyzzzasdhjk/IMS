@@ -54,7 +54,7 @@ public interface ITeamSqlService
     /// </summary>
     /// <param name="tid"></param>
     /// <returns></returns>
-    public TeamInfoModel GetTeamInfo(int tid);
+    public ResponseModel GetTeamInfo(int tid);
 
     /// <summary>
     /// 更新团队信息，根据传入的json中的key来更新
@@ -69,4 +69,19 @@ public interface ITeamSqlService
     /// <param name="uid"></param>
     /// <returns></returns>
     public GetUserTeamsReturnModel GetUserTeams(int uid);
+
+    /// <summary>
+    /// 团队创建者删除掉团队
+    /// </summary>
+    /// <param name="uid"></param>
+    /// <param name="tid"></param>
+    public ResponseModel DeleteTeam(int uid, int tid);
+    
+    /// <summary>
+    /// 查询该团队的全部成员
+    /// </summary>
+    /// <param name="uid"></param>
+    /// <param name="tid"></param>
+    /// <returns></returns>
+    public ResponseModel GetTeamMembers(int uid,int tid);
 }

@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using IMS.Models;
 using IMS.Models.Team;
+using IMS.Models.User;
 using IMS.Service.DataBase;
 using MySql.Data.MySqlClient;
 
@@ -210,6 +211,32 @@ public class TeamMysqlService : ITeamSqlService
         return UserAppointResponseStatus.UnKnown;
     }
 
+    public ResponseModel DeleteTeam(int uid, int tid)
+    {
+        try
+        {
+            // 需要权限鉴定，使用存储过程来完成
+            const string sql = "UserDeleteTeam";
+            using var sqlCommand = new MySqlCommand(sql, _m.GetConnection());
+            sqlCommand.CommandText = sql;
+            sqlCommand.CommandType = CommandType.StoredProcedure;
+            sqlCommand.Parameters.AddWithValue("@u", uid).Direction = ParameterDirection.Input;
+            sqlCommand.Parameters.AddWithValue("@tid", tid).Direction = ParameterDirection.Input;
+            sqlCommand.Parameters.Add("@msg", MySqlDbType.Int32).Direction = ParameterDirection.Output;
+            // 执行存储过程
+            sqlCommand.ExecuteNonQuery();
+            // 从参数的Value属性中获取返回值
+            var returnCode = (int)sqlCommand.Parameters["@msg"].Value;
+            return returnCode == 1
+                ? new ResponseModel(StatusModel.Success, "ok")
+                : new ResponseModel(StatusModel.AuthorizationError, "权限不足");
+        }
+        catch (Exception e)
+        {
+            return new ResponseModel(StatusModel.Unknown, e.Message);
+        }
+    }
+
     public ResponseModel ExitTeam(int uid, int tid)
     {
         try
@@ -234,9 +261,36 @@ public class TeamMysqlService : ITeamSqlService
         }
     }
 
-    public TeamInfoModel GetTeamInfo(int tid)
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="tid"></param>
+    /// <returns></returns>
+    public ResponseModel GetTeamInfo(int tid)
     {
-        return new TeamInfoModel();
+        try
+        {
+            const string sql = "select name,description,created_at,(select count(*) from web.TeamMember where tid = @tid and role != 'Deleted' ) from web.TeamInfo where tid = @tid";
+            using MySqlCommand sqlCommand = new MySqlCommand(sql, _m.GetConnection());
+            sqlCommand.Parameters.AddWithValue("@tid", tid);
+            var result = sqlCommand.ExecuteReader();
+            if (result.HasRows)
+            {
+                result.Read();
+                return new ResponseModel(StatusModel.Success, new TeamInfoModel(
+                    result.GetString(0),result.GetString(1),
+                    result.GetInt32(3),
+                    result.GetDateTime(2).ToString("yyyy-MM-dd")
+                    ));
+            }
+            result.Close();
+            return new ResponseModel(StatusModel.NonExist, "不存在该团队");
+        }
+        catch (Exception e)
+        {
+            return new ResponseModel(StatusModel.Unknown, e.Message);
+        }
     }
 
     /// <summary>
@@ -336,7 +390,7 @@ public class TeamMysqlService : ITeamSqlService
             return result >= 1 ? new ReturnMessageModel() : new ReturnMessageModel(false);
         }
     }
-    
+
     public GetUserTeamsReturnModel GetUserTeams(int uid)
     {
         if (!_m.IsUserStatusNormal(uid))
@@ -352,6 +406,7 @@ public class TeamMysqlService : ITeamSqlService
             var result = sqlCommand.ExecuteReader();
             if (!result.HasRows) // 如果没有查询到值，就返回错误
             {
+                result.Close();
                 return new GetUserTeamsReturnModel(GetUserTeamsReturnStatus.Error);
             }
 
@@ -392,7 +447,49 @@ public class TeamMysqlService : ITeamSqlService
             {
                 return new ResponseModel(StatusModel.Success, "ok");
             }
+
             return new ResponseModel(StatusModel.Unknown);
+        }
+        catch (Exception e)
+        {
+            return new ResponseModel(StatusModel.Unknown, e.Message);
+        }
+    }
+
+    public ResponseModel GetTeamMembers(int uid, int tid)
+    {
+        try
+        {
+            const string sql = "select uid,name,role from web.TeamMemberView where tid = @tid and role != 'Deleted'";
+            using var connection = _m.GetConnection();
+            using var sqlCommand = new MySqlCommand(sql, connection);
+            sqlCommand.Parameters.AddWithValue("@tid", tid);
+            var result = sqlCommand.ExecuteReader();
+            var list = new List<TeamMemberItemModel>();
+            var flag = false; // 判断用户是否在这个团队中
+            if (!result.HasRows) //如果结果列表为空，说明团队不存在
+            {
+                return new ResponseModel(StatusModel.NonExist, "访问异常");
+            }
+
+            while (result.Read())
+            {
+                if (!flag && result.GetInt32(0) == uid) // 判断用户是否在这个团队中
+                {
+                    flag = true;
+                }
+
+                list.Add(new TeamMemberItemModel(result.GetInt32(0),
+                    result.GetString(1), result.GetString(2)));
+            }
+
+            result.Close();
+            if (!flag)
+            {
+                return new ResponseModel(StatusModel.AuthorizationError, "用户不在这个团队中");
+            }
+
+            return new ResponseModel(StatusModel.Success, list);
         }
         catch (Exception e)
         {

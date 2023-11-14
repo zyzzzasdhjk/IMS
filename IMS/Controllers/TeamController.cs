@@ -102,7 +102,13 @@ public class TeamController : Controller
 
         return Json(new AuthorizationReturnModel());
     }
-
+    
+    /// <summary>
+    /// 获取团队的信息
+    /// </summary>
+    /// <param name="u"></param>
+    /// <param name="authorization"></param>
+    /// <returns></returns>
     public JsonResult GetTeamInfo([FromBody] GetTeamInfoRequestModel u, [FromHeader] string authorization)
     {
         if (_u.IsAuthorization(u.Uid, authorization))
@@ -113,5 +119,26 @@ public class TeamController : Controller
         }
 
         return Json(new AuthorizationReturnModel());
+    }
+
+    
+    /// <summary>
+    /// 获取团队的所有的成员的信息
+    /// </summary>
+    /// <param name="u"></param>
+    /// <param name="authorization"></param>
+    /// <returns></returns>
+    public JsonResult GetTeamMembers([FromBody] TeamRequestModel u, [FromHeader] string authorization)
+    {
+        if (_u.IsAuthorization(u.Uid, authorization))
+        {
+            return Json(new AuthorizationReturnModel(
+                _t.GetTeamMembers(u.Uid, u.Tid)
+            ));
+        }
+        else
+        {
+            return Json(new AuthorizationReturnModel());
+        }
     }
 }

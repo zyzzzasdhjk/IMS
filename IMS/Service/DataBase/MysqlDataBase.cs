@@ -25,7 +25,7 @@ public class MysqlDataBase : IRelationalDataBase
 
     public MySqlConnection GetConnection()
     {
-        if (_connection.State == ConnectionState.Broken)
+        /*if (_connection.State == ConnectionState.Broken)
         {
             _connection.Close();//与数据源连接中断，可先关闭，然后重新开启
             _connection.Open();
@@ -33,7 +33,7 @@ public class MysqlDataBase : IRelationalDataBase
         else if (_connection.State == ConnectionState.Closed)
         {
             _connection.Open();
-        }
+        }*/
         return _connection;
     }
 

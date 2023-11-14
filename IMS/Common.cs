@@ -28,7 +28,13 @@ public class Common
                 
                 // Mysql数据库连接字符串
                 JObject mysqlSetting = (JObject)j["Mysql"];
-                MysqlConnectString = String.Format("Database={0};Data Source={1};port={2};User Id={3};;SslMode=none;Password={4};",mysqlSetting["database"], mysqlSetting["address"], mysqlSetting["port"], mysqlSetting["username"], mysqlSetting["password"]);
+                MysqlConnectString =
+                    $"Database={mysqlSetting["database"]};" +
+                    $"Data Source={mysqlSetting["address"]};" +
+                    $"port={mysqlSetting["port"]};" +
+                    $"User Id={mysqlSetting["username"]};" +
+                    $"SslMode=none;Password={mysqlSetting["password"]};" +
+                    $"Pooling=true;ConnectionTimeout=60;MaxPoolSize=200;MinPoolSize=10;";
                 /*ConnectString = j["DataBase"].ToString();*/
                 
                 // MongoDB数据库连接字符串

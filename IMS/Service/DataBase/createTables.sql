@@ -5,7 +5,8 @@ create table if not exists User
 (
     uid        int auto_increment primary key,
     username   varchar(20) unique not null,
-    password   varchar(69) not null,
+    password   varchar(69) not null comment '密码', 
+    email      varchar(50) not null unique comment '邮箱',
     created_at DATETIME   default CURRENT_TIMESTAMP null,
     updated_at DATETIME   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     status     enum ('Normal', 'Banned', 'Deleted', 'UnConfirmed') default 'Normal' not null
@@ -15,10 +16,9 @@ create table if not exists User
 CREATE TABLE IF NOT EXISTS UserInfo (
     uid INT PRIMARY KEY,
     name VARCHAR(20) NOT NULL,
-    gender ENUM('Male', 'Female', 'Other', 'Unknown') NOT NULL,
+    gender ENUM('男', '女', '其他', '未知') NOT NULL,
     birthday DATE,
     description TEXT,
-    email VARCHAR(20) not null comment '用户的邮箱',
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     foreign key (uid) references User(uid)
 );

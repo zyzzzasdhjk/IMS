@@ -36,7 +36,7 @@ public class MongoDataBase : INosqlDataBase
 
     public MongoDataBase()
     {
-        var m = new MongoClient(Common.MongoDBConnectString);
+        var m = new MongoClient(Common.MongoDbConnectString);
         _d = m.GetDatabase("WEB");
         
     }
@@ -65,6 +65,28 @@ public class MongoDataBase : INosqlDataBase
     }
 
     /// <summary>
+    /// 将code添加到对应的集合中，添加时会删除掉之前存在的code
+    /// </summary>
+    /// <param name="collectionName"></param>
+    /// <param name="uid"></param>
+    /// <param name="code"></param>
+    /// <returns></returns>
+    private bool AddCodeToCollection(string collectionName, int uid, string code)
+    {
+        try
+        {
+            var collection = _d.GetCollection<UserCode>(collectionName);
+            collection.DeleteMany(new BsonDocument("Uid", uid));
+            collection.InsertOne(new UserCode(uid, code));
+            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }
+    
+    /// <summary>
     /// 将用户的验证码添加进入集合中，超时时间为30分钟
     /// </summary>
     /// <param name="uid"></param>
@@ -72,11 +94,7 @@ public class MongoDataBase : INosqlDataBase
     /// <returns></returns>
     public bool AddUserConfirmCode(int uid, int checkCode)
     {
-        var confirmCode = GetUserConfirmCodeCollection();
-        var u = new UserCode(uid, checkCode);
-        Console.WriteLine($"{u.Uid}   {u.CheckCode}");
-        confirmCode.InsertOne(u);
-        return true;
+        return AddCodeToCollection("UserRegisterConfirm", uid, Convert.ToString(checkCode));
     }
     
     /// <summary>
@@ -90,9 +108,6 @@ public class MongoDataBase : INosqlDataBase
         return confirmCode.Find(new BsonDocument("Uid", uid)).Any();
     }
 
-
-
-    
     /// <summary>
     /// 判断用户的验证码是否正确
     /// </summary>
@@ -157,5 +172,10 @@ public class MongoDataBase : INosqlDataBase
             Console.WriteLine(e);
             return -2;
         }
+    }
+
+    public bool AddUserEmailCheckCode(int uid)
+    {
+        throw new NotImplementedException();
     }
 }

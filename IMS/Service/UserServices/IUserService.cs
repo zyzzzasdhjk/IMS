@@ -19,7 +19,7 @@ public interface IUserService
     /// <param name="username"></param>
     /// <param name="password"></param>
     /// <returns></returns>
-    public UserLoginReturnModel LoginUser(string username, string password);
+    public ResponseModel LoginUser(string username, string password);
 
     /// <summary>
     /// 删除用户
@@ -51,13 +51,32 @@ public interface IUserService
     /// <param name="username"></param>
     /// <param name="email"></param>
     /// <returns></returns>
-    public ReturnMessageModel ResendEmail(string username, string email);
+    public ResponseModel ResendEmail(int uid);
     
     /// <summary>
-    /// 修改用户密码
+    /// 根据uid来修改用户的预留邮箱
     /// </summary>
     /// <param name="uid"></param>
-    /// <param name="password"></param>
+    /// <param name="email"></param>
     /// <returns></returns>
-    public ReturnMessageModel ResetPassword(string uid, string password);
+    public ResponseModel ResetEmail(string uid,string email);
+    // public ResponseModel ResetEmail(string username, string email);
+    
+    /// <summary>
+    /// 修改用户密码,这一不需要密码，是发送验证码
+    /// </summary>
+    /// <param name="uid"></param>
+    /// <returns></returns>
+    public ResponseModel ResetPassword(int uid);
+
+    /// <summary>
+    /// 这是修改用户密码
+    /// </summary>
+    /// <param name="uid"></param>
+    /// <param name="newPwd"></param>
+    /// <param name="checkCode"></param>
+    /// <returns></returns>
+    public ResponseModel ResetPasswordConfirm(int uid, string newPwd, string checkCode);
+
+    public ResponseModel GetUserInfo(int uid);
 }

@@ -278,7 +278,7 @@ public class TeamMysqlService : ITeamSqlService
             if (result.HasRows)
             {
                 result.Read();
-                return new ResponseModel(StatusModel.Success, new TeamInfoModel(
+                return new ResponseModel(StatusModel.Success, "ok",new TeamInfoModel(
                     result.GetString(0),result.GetString(1),
                     result.GetInt32(3),
                     result.GetDateTime(2).ToString("yyyy-MM-dd")
@@ -489,7 +489,7 @@ public class TeamMysqlService : ITeamSqlService
                 return new ResponseModel(StatusModel.AuthorizationError, "用户不在这个团队中");
             }
 
-            return new ResponseModel(StatusModel.Success, list);
+            return new ResponseModel(StatusModel.Success, "ok",list);
         }
         catch (Exception e)
         {

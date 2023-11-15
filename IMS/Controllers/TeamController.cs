@@ -136,9 +136,6 @@ public class TeamController : Controller
                 _t.GetTeamMembers(u.Uid, u.Tid)
             ));
         }
-        else
-        {
-            return Json(new AuthorizationReturnModel());
-        }
+        return Json(new AuthorizationReturnModel());
     }
 }

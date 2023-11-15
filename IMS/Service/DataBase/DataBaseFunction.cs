@@ -18,4 +18,15 @@ public class DataBaseFunction
         }
         return list;
     }
+
+    
+    /// <summary>
+    /// 解析错误1062出现的列名
+    /// </summary>
+    /// <param name="s"></param>
+    /// <returns></returns>
+    public static string Error1062Parse(string s)
+    {
+        return s.Split('\'')[^1].Split('.')[1]; // 获取字段名[]
+    }
 }

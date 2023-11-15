@@ -4,8 +4,6 @@ using IMS.Data;
 using IMS.Service.DataBase;
 using IMS.Service.TeamServices;
 using IMS.Service.UserServices;
-using Microsoft.AspNetCore.Authentication;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

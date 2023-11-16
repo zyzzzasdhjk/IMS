@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-namespace IMS.Models;
+﻿namespace IMS.Models;
 
 public enum AuthorizationReturnStatus
 {

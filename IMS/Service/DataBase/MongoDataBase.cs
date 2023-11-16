@@ -14,18 +14,11 @@ public class MongoDataBase : INosqlDataBase
     [BsonIgnoreExtraElements]
     private class UserCode
     {
-        public int Uid;
+        public readonly int Uid;
         public string CheckCode;
         public DateTime CreateAt; // readonly 只能在初始化的时候被修改
         /*设置readonly时会导致插入的空的文档*/
 
-        public UserCode(int uid, int code)
-        {
-            Uid = uid;
-            CheckCode = Convert.ToString(code);
-            CreateAt = DateTime.Now;
-        }
-        
         public UserCode(int uid, string code)
         {
             Uid = uid;
@@ -34,11 +27,18 @@ public class MongoDataBase : INosqlDataBase
         }
     }
 
+    private void DoNothing()
+    {
+        var a = new UserCode(1,"");
+        Console.WriteLine(a.CheckCode);
+        Console.WriteLine(a.CreateAt);
+    }
+
     public MongoDataBase()
     {
         var m = new MongoClient(Common.MongoDbConnectString);
         _d = m.GetDatabase("WEB");
-        
+        DoNothing();
     }
 
     public IMongoCollection<BsonDocument> GetUserCollectionBase()
@@ -80,7 +80,7 @@ public class MongoDataBase : INosqlDataBase
             collection.InsertOne(new UserCode(uid, code));
             return true;
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return false;
         }

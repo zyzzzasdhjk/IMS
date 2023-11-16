@@ -2,7 +2,7 @@
 
 public class TeamMember
 {
-    public string Name { get; set; }
-    public string role { get; set; }
-    public DateTime joinTime { get; set; }
+    public string Name { get; set; } = "";
+    public string Role { get; set; } = "";
+    public DateTime JoinTime { get; set; } = new DateTime();
 }

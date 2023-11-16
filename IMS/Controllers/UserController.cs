@@ -1,5 +1,6 @@
 ﻿using IMS.Models;
 using IMS.Models.User;
+using IMS.Service.FileService;
 using IMS.Service.UserServices;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,7 +45,7 @@ public class UserController : Controller
             return Json(new ReturnMessageModel("账号或者密码不能为空"));
         }
 
-        var rs = _u.RegisterUser(user.Username, user.Password, user.Email);
+        var rs = _u.RegisterUser(user.Username, user.Password, user.Email ?? "");
         return Json(rs);
     }
 
@@ -113,10 +114,19 @@ public class UserController : Controller
         if (_u.IsAuthorization(u.Uid, authorization))
         {
             return Json(
-                _u.ResetPasswordConfirm(u.Uid,  u.Password,u.CheckCode)
+                _u.ResetPasswordConfirm(u.Uid, u.Password, u.CheckCode)
             );
         }
 
-        return Json(new ResponseModel(StatusModel.AuthorizationError,"拒绝访问"));
+        return Json(new ResponseModel(StatusModel.AuthorizationError, "拒绝访问"));
+    }
+
+    /// <summary>
+    /// 获取OOS的校验码
+    /// </summary>
+    /// <returns></returns>
+    public JsonResult Cos()
+    {
+        return Json(ObjectStorageService.GetUploadRight("UserImage"));
     }
 }

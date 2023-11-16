@@ -57,7 +57,7 @@ public interface INosqlDataBase
     /// <param name="uid"></param>
     /// <returns></returns>
     public bool AddUserEmailCheckCode(int uid);
-    
+
     /// <summary>
     /// 根据uid，密码和当前时间生成校验码
     /// </summary>

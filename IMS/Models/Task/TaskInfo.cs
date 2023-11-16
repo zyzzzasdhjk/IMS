@@ -2,8 +2,8 @@
 
 public class TaskInfo
 {
-    int TaskId { get; set; }
-    string Name { get; set; }
-    string? Description { get; set; }
+    public int TaskId { get; set; }
+    public string Name { get; set; } = "";
+    public string? Description { get; set; } = "";
     
 }

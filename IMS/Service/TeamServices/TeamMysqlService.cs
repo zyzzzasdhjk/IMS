@@ -1,7 +1,6 @@
 ﻿using System.Data;
 using IMS.Models;
 using IMS.Models.Team;
-using IMS.Models.User;
 using IMS.Service.DataBase;
 using MySql.Data.MySqlClient;
 

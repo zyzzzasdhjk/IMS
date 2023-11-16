@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Net.Mail;
 using System.Text;
 
@@ -10,7 +9,7 @@ namespace IMS.Service.UserServices;
 /// </summary>
 public class EmailService
 {
-    public static EmailSetting EmailServiceSetting { get; set; } = Common.EmailServiceSetting;
+    private static readonly EmailSetting EmailServiceSetting = Common.EmailServiceSetting;
     
     /// <summary>
     /// 发送邮件方法

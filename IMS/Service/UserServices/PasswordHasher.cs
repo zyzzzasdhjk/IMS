@@ -1,5 +1,4 @@
-﻿using System;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 
 namespace IMS.Service.UserServices;
@@ -45,7 +44,7 @@ public class PasswordHasher
 
     private static string GenerateSalt()
     {
-        using (var rngCryptoServiceProvider = new RNGCryptoServiceProvider())
+        using (var rngCryptoServiceProvider = RandomNumberGenerator.Create())
         {
             var saltBytes = new byte[SaltSize];
             rngCryptoServiceProvider.GetBytes(saltBytes);

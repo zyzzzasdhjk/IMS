@@ -1,4 +1,4 @@
-﻿namespace IMS.Models.User;
+﻿namespace IMS.Models.Team;
 
 public class TeamMemberItemModel
 {

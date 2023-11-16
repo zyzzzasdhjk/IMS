@@ -10,6 +10,7 @@ public interface IUserService
     /// </summary>
     /// <param name="username"></param>
     /// <param name="password"></param>
+    /// /// <param name="email"></param>
     /// <returns></returns>
     public UserRegisterReturnModel RegisterUser(string username, string password, string email);
 
@@ -35,8 +36,8 @@ public interface IUserService
     /// <param name="uid"></param>
     /// <param name="checkCode"></param>
     /// <returns></returns>
-    public UserConfirmReturnModel ConfirmUser(int uid ,int checkCode);
-    
+    public UserConfirmReturnModel ConfirmUser(int uid, int checkCode);
+
     /// <summary>
     /// 判断用户是否已经获得了授权
     /// </summary>
@@ -48,20 +49,19 @@ public interface IUserService
     /// <summary>
     /// 重新发送验证邮件
     /// </summary>
-    /// <param name="username"></param>
-    /// <param name="email"></param>
+    /// <param name="uid"></param>
     /// <returns></returns>
     public ResponseModel ResendEmail(int uid);
-    
+
     /// <summary>
     /// 根据uid来修改用户的预留邮箱
     /// </summary>
     /// <param name="uid"></param>
     /// <param name="email"></param>
     /// <returns></returns>
-    public ResponseModel ResetEmail(string uid,string email);
+    public ResponseModel ResetEmail(string uid, string email);
     // public ResponseModel ResetEmail(string username, string email);
-    
+
     /// <summary>
     /// 修改用户密码,这一不需要密码，是发送验证码
     /// </summary>

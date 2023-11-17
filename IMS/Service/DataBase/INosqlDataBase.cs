@@ -59,6 +59,21 @@ public interface INosqlDataBase
     public bool AddUserEmailCheckCode(int uid);
 
     /// <summary>
+    /// 将获取的上传密钥暂时存起来
+    /// </summary>
+    /// <param name="s"></param>
+    /// <param name="name">key的名字</param>
+    /// <returns></returns>
+    public void AddTmpKey(object s,string name);
+    
+    /// <summary>
+    /// 获取暂存的key,没有的话
+    /// </summary>
+    /// <param name="name">key的名字</param>
+    /// <returns></returns>
+    public object? GetTmpKey(string name);
+    
+    /// <summary>
     /// 根据uid，密码和当前时间生成校验码
     /// </summary>
     /// <param name="uid"></param>

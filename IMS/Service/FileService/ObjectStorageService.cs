@@ -42,7 +42,7 @@ public class ObjectStorageService
             .SetRegion(Region)
             .Build();
 
-       CosCredentialProvider = new DefaultQCloudCredentialProvider(SecretId, SecretKey, 600);
+       CosCredentialProvider = new DefaultQCloudCredentialProvider(SecretId, SecretKey, 15768000);
     }
 
     public static object GetReadRight(string path)
@@ -92,7 +92,7 @@ public class ObjectStorageService
         //     "path/to/dir2/*",
         // });
         values.Add("allowActions", WritePolicy);
-        values.Add("durationSeconds", 1800);
+        values.Add("durationSeconds", 3600);
 
         values.Add("secretId", SecretId);
         values.Add("secretKey", SecretKey);

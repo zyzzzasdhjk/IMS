@@ -178,4 +178,38 @@ public class MongoDataBase : INosqlDataBase
     {
         throw new NotImplementedException();
     }
+
+    [BsonIgnoreExtraElements]
+    public class TempKey
+    {
+        public string Name { get; set; }
+        public object Key { get; set; }
+        public DateTime CreateAt { get; set; }
+        
+        public TempKey(string name, object key, DateTime createAt)
+        {
+            Name = name;
+            Key = key;
+            CreateAt = createAt;
+        }
+    }
+    
+    public void AddTmpKey(object s, string name)
+    {
+        var collection = _d.GetCollection<TempKey>("TmpKey");
+        collection.InsertOne(
+            new TempKey(name, s, DateTime.Now));
+    }
+
+    public object? GetTmpKey(string name)
+    {
+        var collection = _d.GetCollection<TempKey>("TmpKey");
+        var result = collection.Find(Builders<TempKey>.Filter.
+            Eq("Name", name)).FirstOrDefault();
+        if (result == null)
+        {
+            return null;
+        }
+        return result.Key;
+    }
 }

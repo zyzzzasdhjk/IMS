@@ -15,11 +15,9 @@ public class UserController : Controller
         _u = u;
     }
 
-    public JsonResult Index()
+    public JsonResult Test()
     {
-        var j = new Dictionary<string, string>();
-        j.Add("msg", "error");
-        return Json(j);
+        return Json("123");
     }
 
     public JsonResult Login([FromBody] UserAccount user)

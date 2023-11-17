@@ -13,6 +13,7 @@ public class EmailSetting
 
 public class ObjectStorageSetting
 {
+    public string Appid { get; set; } = "";
     public string Bucket { get; set; } = "";
     public string Region { get; set; } = "";
     public string SecretId { get; set; } = "";
@@ -68,6 +69,8 @@ public class Common
 
                 // 对象存储所需的数据
                 var objectStorageSettingObject = (JObject)(j["OOS"] ?? new JObject());
+                ObjectStorageSetting.Appid =
+                    objectStorageSettingObject["appid"]?.ToString() ?? "";
                 ObjectStorageSetting.Bucket =
                     objectStorageSettingObject["bucket"]?.ToString() ?? "";
                 ObjectStorageSetting.Region =

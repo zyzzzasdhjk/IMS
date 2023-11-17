@@ -1,7 +1,7 @@
 use web;
 
 -- 用户账号表，单独与用户信息
-create table if not exists User 
+create table if not exists web.User 
 (
     uid        int auto_increment primary key,
     username   varchar(20) unique not null,
@@ -13,7 +13,7 @@ create table if not exists User
 );
 
 -- 用户信息表
-CREATE TABLE IF NOT EXISTS UserInfo (
+CREATE TABLE IF NOT EXISTS web.UserInfo (
     uid INT PRIMARY KEY,
     name VARCHAR(20) NOT NULL,
     gender ENUM('男', '女', '其他', '未知') NOT NULL,
@@ -23,11 +23,11 @@ CREATE TABLE IF NOT EXISTS UserInfo (
     foreign key (uid) references User(uid)
 );
 
-CREATE TRIGGER InsertUserInfo AFTER INSERT ON User
+CREATE TRIGGER InsertUserInfo AFTER INSERT ON web.User
 FOR EACH ROW
 BEGIN
     INSERT INTO UserInfo(uid, name, gender) VALUE (NEW.uid, NEW.username, 'Unknown');
-END ;
+END;
 
 -- 团队信息表
 CREATE TABLE IF NOT EXISTS TeamInfo(

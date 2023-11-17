@@ -1,0 +1,29 @@
+﻿{
+  "Mysql": {
+    "address": "localhost",
+    "port": 3306,
+    "username": "",
+    "password": "",
+    "database": ""
+  },
+  "MongoDB":{
+    "address" : "localhost",
+    "port" : 27017,
+    "username" : "",
+    "password" : "",
+    "database" : ""
+  },
+  "EmailSetting": {
+    "usernmae": "",
+    "password": "",
+    "host": "smtp.163.com",
+    "port": 587
+  },
+  "OOS" :{
+    "appid" :"",
+    "bucket": "",
+    "region": "",
+    "secretId" : "",
+    "secretKey" : ""
+  }
+}

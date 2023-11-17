@@ -273,7 +273,7 @@ public class TeamMysqlService : ITeamSqlService
             const string sql = "select name,description,created_at,(select count(*) from web.TeamMember where tid = @tid and role != 'Deleted' ) from web.TeamInfo where tid = @tid";
             using MySqlCommand sqlCommand = new MySqlCommand(sql, _m.GetConnection());
             sqlCommand.Parameters.AddWithValue("@tid", tid);
-            var result = sqlCommand.ExecuteReader();
+            using var result = sqlCommand.ExecuteReader();
             if (result.HasRows)
             {
                 result.Read();
@@ -465,7 +465,7 @@ public class TeamMysqlService : ITeamSqlService
             sqlCommand.Parameters.AddWithValue("@tid", tid);
             var result = sqlCommand.ExecuteReader();
             var list = new List<TeamMemberItemModel>();
-            var flag = false; // 判断用户是否在这个团队中
+            // var flag = false; // 判断用户是否在这个团队中
             if (!result.HasRows) //如果结果列表为空，说明团队不存在
             {
                 return new ResponseModel(StatusModel.NonExist, "访问异常");
@@ -473,20 +473,20 @@ public class TeamMysqlService : ITeamSqlService
 
             while (result.Read())
             {
-                if (!flag && result.GetInt32(0) == uid) // 判断用户是否在这个团队中
+                /*if (!flag && result.GetInt32(0) == uid) // 判断用户是否在这个团队中
                 {
                     flag = true;
-                }
+                }*/
 
                 list.Add(new TeamMemberItemModel(result.GetInt32(0),
                     result.GetString(1), result.GetString(2)));
             }
 
             result.Close();
-            if (!flag)
+            /*if (!flag)
             {
                 return new ResponseModel(StatusModel.AuthorizationError, "用户不在这个团队中");
-            }
+            }*/
 
             return new ResponseModel(StatusModel.Success, "ok",list);
         }

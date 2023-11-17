@@ -111,14 +111,7 @@ public class TeamController : Controller
     /// <returns></returns>
     public JsonResult GetTeamInfo([FromBody] GetTeamInfoRequestModel u, [FromHeader] string authorization)
     {
-        if (_u.IsAuthorization(u.Uid, authorization))
-        {
-            return Json(new AuthorizationReturnModel(
-                _t.GetTeamInfo(u.Tid)
-            ));
-        }
-
-        return Json(new AuthorizationReturnModel());
+        return Json(_t.GetTeamInfo(u.Tid));
     }
 
     
@@ -130,12 +123,13 @@ public class TeamController : Controller
     /// <returns></returns>
     public JsonResult GetTeamMembers([FromBody] TeamRequestModel u, [FromHeader] string authorization)
     {
-        if (_u.IsAuthorization(u.Uid, authorization))
+        /*if (_u.IsAuthorization(u.Uid, authorization))
         {
             return Json(new AuthorizationReturnModel(
                 _t.GetTeamMembers(u.Uid, u.Tid)
             ));
         }
-        return Json(new AuthorizationReturnModel());
+        return Json(new AuthorizationReturnModel());*/
+        return Json(_t.GetTeamMembers(u.Uid, u.Tid));
     }
 }

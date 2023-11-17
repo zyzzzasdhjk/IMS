@@ -125,8 +125,22 @@ public class UserController : Controller
     /// 获取OOS的校验码
     /// </summary>
     /// <returns></returns>
-    public JsonResult Cos()
+    public JsonResult Cos([FromBody] UidRequestModel u,[FromHeader] string authorization)
     {
-        return Json(ObjectStorageService.GetUploadRight("UserImage"));
+        if (_u.IsAuthorization(u.Uid, authorization))
+        {
+            return Json(ObjectStorageService.GetUploadRight($"UserImage/{u.Uid}.*"));
+        }
+        return Json(new ResponseModel(StatusModel.AuthorizationError, "拒绝访问"));
+    }
+
+    public JsonResult CosTest()
+    {
+        return Json(ObjectStorageService.GetUploadRight("*"));
+    }
+
+    public JsonResult CosDownloadTest()
+    {
+        return Json(ObjectStorageService.GetReadRight("*"));
     }
 }

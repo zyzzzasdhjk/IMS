@@ -1,4 +1,5 @@
 ﻿{
+  "test" : "zsycgx",
   "Mysql": {
     "address": "localhost",
     "port": 3306,

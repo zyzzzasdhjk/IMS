@@ -14,6 +14,11 @@ public class AdminController : Controller
         _m = m;
     }
     
+    public IActionResult Index()
+    {
+        return View();
+    }
+    
     public JsonResult Test()
     {
         return Json("123");

@@ -27,4 +27,8 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Include="wwwroot\js\cos-js-sdk-v5.min.js" />
+    </ItemGroup>
+
 </Project>

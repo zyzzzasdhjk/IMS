@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebsiteStaticResources</title>
+    <script src="./js/cos-js-sdk-v5.min.js"></script>
+</head>
+<body>
+<div style="display: flex;flex-direction: column;">
+    <div style="display: flex;flex-direction: row;">
+        <input type="file" id="fileSelector">
+        <input type="button" value="上传" id="upload">
+    </div>
+    <div>
+        <p id="msg">
+
+        </p>
+    </div>
+    <div>
+        <p id="progress"></p>
+    </div>
+</div>
+</body>
+
+<script>
+    var msgDiv = document.getElementById("msg");
+    var progressDiv = document.getElementById("progress");
+
+    const cos = new COS({
+        // getAuthorization 必选参数
+        getAuthorization: function (options, callback) {
+            // 初始化时不会调用，只有调用 cos 方法（例如 cos.putObject）时才会进入
+            // 异步获取临时密钥
+            // 服务端 JS 和 PHP 例子：https://github.com/tencentyun/cos-js-sdk-v5/blob/master/server/
+            // 服务端其他语言参考 COS STS SDK ：https://github.com/tencentyun/qcloud-cos-sts-sdk
+            // STS 详细文档指引看：https://cloud.tencent.com/document/product/436/14048
+            const url = 'http://localhost:9000/admin/UploadStaticResources'; // url 替换成您自己的后端服务
+            const xhr = new XMLHttpRequest();
+            let data = null;
+            let credentials = null;
+            xhr.open('GET', url, true);
+            xhr.onload = function (e) {
+                try {
+                    data = JSON.parse(e.target.responseText);
+                }
+                catch (e) {
+                }
+                if (!data) {
+                    msgDiv.innerText = 'credentials invalid:\n' + JSON.stringify(data, null, 2);
+                    return console.error('credentials invalid:\n' + JSON.stringify(data, null, 2))
+                };
+                console.log(data)
+                callback(data);
+                // callback({
+                //     TmpSecretId: data.tmpSecretId,
+                //     TmpSecretKey: data.tmpSecretKey,
+                //     SecurityToken: data.securityToken,
+                //     // 建议返回服务器时间作为签名的开始时间，避免用户浏览器本地时间偏差过大导致签名错误
+                //     StartTime: data.startTime, // 时间戳，单位秒，如：1580000000
+                //     ExpiredTime: data.expiredTime, // 时间戳，单位秒，如：1580000000
+                // });
+            };
+            xhr.send();
+        }
+    });
+
+    function uploadResource(file){
+        cos.uploadFile({
+                Bucket: "web-1310216532" /* 填写自己的 bucket，必须字段 */,
+                Region: "ap-nanjing" /* 存储桶所在地域，必须字段 */,
+                Key: "WebsiteStaticResources/"+file.name, /* 存储在桶里的对象键（例如:1.jpg，a/b/test.txt，图片.jpg）支持中文，必须字段 */
+                Body: file, // 上传文件对象
+                SliceSize:
+                    1024 *
+                    1024 *
+                    5 /* 触发分块上传的阈值，超过5MB使用分块上传，小于5MB使用简单上传。可自行设置，非必须 */,
+                onProgress: function (progressData) {
+                    console.log(JSON.stringify(progressData));
+                    progressDiv.innerText = "";
+                    progressDiv.innerText = progressDiv.innerText + JSON.stringify(progressData);
+                },
+            },
+            function (err, data) {
+                if (err) {
+                    msgDiv.innerText = err;
+                    console.log("上传失败", err);
+                } else {
+                    const url = 'http://localhost:9000/admin/UploadStaticResourcesEnd?key='+file.name; // url 替换成您自己的后端服务
+                    const xhr = new XMLHttpRequest();
+                    let data = null;
+                    let credentials = null;
+                    xhr.open('GET', url, true);
+                    xhr.onload = function (e) {
+                        try {
+                            data = JSON.parse(e.target.responseText);
+                        }
+                        catch (e) {
+                        }
+                        if (!data) {
+                            msgDiv.innerText = 'credentials invalid:\n' + JSON.stringify(data, null, 2);
+                            return console.error('credentials invalid:\n' + JSON.stringify(data, null, 2))
+                        };
+                        console.log(data)
+                        msgDiv.innerText = data.data.url;
+                    };
+                    xhr.onreadystatechange = function() {
+                        if (this.readyState == 4 && this.status == 200) {
+                            msgDiv.innerText = data;
+                        }
+                        msgDiv.innerText = data;
+                    };
+                    xhr.send();
+                }
+            });
+    }
+
+    document.getElementById("upload").onclick = function (e) {
+        var file = document.getElementById("fileSelector").files[0];
+        if (!file) {
+            msgDiv.innerText = "未选择上传文件";
+            return;
+        }
+        uploadResource(file);
+    }
+</script>
+
+</html>

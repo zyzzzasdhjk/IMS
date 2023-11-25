@@ -56,8 +56,11 @@ public class Common
 
                 // MongoDB数据库连接字符串
                 JObject mongoDbSetting = (JObject)(j["MongoDB"] ?? new JObject());
-                MongoDbConnectString =
-                    String.Format("mongodb://{0}:{1}", mongoDbSetting["address"], mongoDbSetting["port"]);
+                /*MongoDbConnectString =
+                    $"mongodb://{mongoDbSetting["username"]}:{mongoDbSetting["password"]}" +
+                    $"@{mongoDbSetting["address"]}:{mongoDbSetting["port"]}/";
+                */
+                MongoDbConnectString = $"mongodb://{mongoDbSetting["address"]}:{mongoDbSetting["port"]}/";
                 /*ConnectString = j["DataBase"].ToString();*/
 
                 // 邮箱服务器连接字符串

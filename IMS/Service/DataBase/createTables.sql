@@ -16,7 +16,7 @@ create table if not exists web.User
 CREATE TABLE IF NOT EXISTS web.UserInfo (
     uid INT PRIMARY KEY,
     name VARCHAR(20) NOT NULL,
-    gender ENUM('男', '女', '其他', '未知') NOT NULL,
+    gender ENUM('男', '女', '其他', '未知') NOT NULL DEFAULT '未知',
     birthday DATE,
     description TEXT,
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS web.UserInfo (
 CREATE TRIGGER InsertUserInfo AFTER INSERT ON web.User
 FOR EACH ROW
 BEGIN
-    INSERT INTO UserInfo(uid, name, gender) VALUE (NEW.uid, NEW.username, 'Unknown');
+    INSERT INTO UserInfo(uid, name) VALUE (NEW.uid, NEW.username);
 END;
 
 -- 团队信息表
@@ -108,10 +108,10 @@ CREATE TABLE TaskInfo(
     taskId int primary key ,
     name varchar(20),
     description text,
-    status enum('Incomplete','Complete','Timeout','Abandon'),
+    status enum('Incomplete','Complete','Timeout','Abandon') default 'Incomplete',
     -- proportion int, -- 分值，用于计算总的进度和当前进度
     created_at DATETIME   default CURRENT_TIMESTAMP null,
-    end_at DATETIME, -- 预计的完成时间,如果是null的话，就代表是没有结束时间限制
+    end_at DATETIME not null, -- 预计的完成时间,如果是null的话，就代表是没有结束时间限制
     updated_at DATETIME   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP
 );
 
@@ -129,4 +129,31 @@ CREATE TABLE IF NOT EXISTS TaskSubtasks(
     subtaskId int,
     foreign key (subtaskId) references TaskInfo(taskId),
     foreign key (taskId) references TaskInfo(taskId)
-)
+);
+
+-- 任务-成员表
+CREATE TABLE IF NOT EXISTS TaskMembers(
+    taskId int,
+    uid int,
+    role enum('Admin','Member','Deleted') default 'Member',
+    created_at DATETIME default CURRENT_TIMESTAMP null,
+    updated_at DATETIME default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    primary key(taskId,uid),
+    foreign key (taskId) references TaskInfo(taskId),
+    foreign key (uid) references User(uid)
+);
+
+-- 创建团队 参数为名字，描述和结束时间
+CREATE PROCEDURE CreateTask(IN ti int,IN n varchar(20),IN d text,IN t DATETIME)
+BEGIN
+    INSERT INTO TaskInfo (name, description, end_at) VALUES (n, d, t);
+    INSERT INTO TeamTasks (tid, taskId) VALUES (ti, LAST_INSERT_ID());
+END;
+
+-- 删除团队 删除团队的时候删除全部的团队成员
+CREATE TRIGGER DeleteTask BEFORE DELETE ON TeamInfo
+FOR EACH ROW
+BEGIN
+    UPDATE TaskMembers SET TaskMembers.role = 'Deleted' WHERE tid = OLD.tid;
+END;
+

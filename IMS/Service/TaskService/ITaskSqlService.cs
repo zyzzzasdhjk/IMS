@@ -53,5 +53,5 @@ public interface ITaskSqlService
     /// <param name="uid"></param>
     /// <param name="path">mongodb数据库中对应的文件id</param>
     /// <returns></returns>
-    public ResponseModel SubmitTaskFile(int tid, int uid, int path);
+    public ResponseModel SubmitTaskFile(int tid, int uid, List<string> path);
 }

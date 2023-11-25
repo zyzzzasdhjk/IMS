@@ -127,17 +127,21 @@ function ConfirmEmailPost() {
             if (result.code !== 0){
                 ConfirmFailed(result.message);
             }else{
-                ConfirmSuccess();
+                PostSuccess();
                 Uid = result.uid;
+                RegisterUsername = user;
+                // 为了防止信息发送错误，应该在验证成功是锁住用户名和密码框
+                document.getElementById("RegisterUsername").readOnly = true;
+                document.getElementById("RegisterPassword").readOnly = true;
+                document.getElementById("RegisterEmail").readOnly = true;
                 console.log(Uid);
             }
         })
         .catch(error => console.log('error', error));
-    
-    // 为了防止信息发送错误，应该在验证成功是锁住用户名和密码框
 }
 
 var Uid = -1; // 存储发来的数据
+var RegisterUsername = "";
 
 function RegisterPost(){
     let ConfirmCode = document.getElementById("ConfirmCode").value;
@@ -169,16 +173,17 @@ function RegisterPost(){
                 ConfirmFailed(result.message);
             }else{
                 Qmsg.success("注册成功");
-                setTimeout(2000,function (){
-                    document.getElementById()
-                })
-                Qmsg.clear();
+                setTimeout(function (){
+                    Qmsg.closeAll();
+                    document.getElementById("GoLogin").click();
+                    document.getElementById("LoginUsername").value = RegisterUsername;
+                },2000)
             }
         })
         .catch(error => console.log('error', error));
 }
 
-function ConfirmSuccess(){
+function PostSuccess(){
     Qmsg.success("验证邮件已经发送，请查收");
 }
 
@@ -198,5 +203,10 @@ document.getElementById("Register").addEventListener("click",function (e){
 
 document.getElementById("Login").addEventListener("click",function (e){
     LoginPost();
+    e.preventDefault();
+})
+
+document.getElementById("ForgetPassword").addEventListener("click",function (e){
+    Qmsg.info("私密马赛，这个功能还没实现哦！")
     e.preventDefault();
 })

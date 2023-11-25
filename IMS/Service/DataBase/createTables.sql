@@ -6,7 +6,7 @@ create table if not exists web.User
     uid        int auto_increment primary key,
     username   varchar(20) unique not null,
     password   varchar(69) not null comment '密码', 
-    email      varchar(50) not null unique comment '邮箱',
+    email      varchar(50) not null comment '邮箱',
     created_at DATETIME   default CURRENT_TIMESTAMP null,
     updated_at DATETIME   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     status     enum ('Normal', 'Banned', 'Deleted', 'UnConfirmed') default 'Normal' not null

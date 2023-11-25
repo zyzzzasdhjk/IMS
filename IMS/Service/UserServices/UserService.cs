@@ -97,13 +97,12 @@ public class UserService : IUserService
         /*判断密码合格后对密码进行SHA加密*/
         password = PasswordHasher.HashPassword(password);
 
-        /*查询是否存在相同的账号或者是邮箱*/
+        /*查询是否存在相同的账号或者是邮箱，允许邮箱重复*/
         const string sql = "select username,email from web.User " +
-                           "where username = @username or email = @email";
+                           "where username = @username";
         using (var sqlCommand = new MySqlCommand(sql, _d.GetConnection()))
         {
             sqlCommand.Parameters.AddWithValue("@username", username);
-            sqlCommand.Parameters.AddWithValue("@email", email);
             var result = sqlCommand.ExecuteReader();
             if (result.HasRows) // 当存在数据的时候，说明有邮箱或者是用户名重复了
             {
@@ -115,13 +114,6 @@ public class UserService : IUserService
                 {
                     return new UserRegisterReturnModel(
                         UserRegisterReturnStatus.UserNameRepeat);
-                }
-
-                if (resultEmail == email)
-                {
-                    return new
-                        UserRegisterReturnModel(
-                            UserRegisterReturnStatus.EmailRepeat);
                 }
             }
 

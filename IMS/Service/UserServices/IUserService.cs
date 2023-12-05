@@ -12,7 +12,7 @@ public interface IUserService
     /// <param name="password"></param>
     /// /// <param name="email"></param>
     /// <returns></returns>
-    public UserRegisterReturnModel RegisterUser(string username, string password, string email);
+    public ResponseModel RegisterUser(string username, string password, string email);
 
     /// <summary>
     /// 用户登录
@@ -36,7 +36,7 @@ public interface IUserService
     /// <param name="uid"></param>
     /// <param name="checkCode"></param>
     /// <returns></returns>
-    public UserConfirmReturnModel ConfirmUser(int uid, int checkCode);
+    public ResponseModel ConfirmUser(int uid, int checkCode);
 
     /// <summary>
     /// 判断用户是否已经获得了授权

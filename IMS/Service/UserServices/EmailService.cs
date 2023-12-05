@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Mail;
 using System.Text;
+using IMS_API;
 
 namespace IMS.Service.UserServices;
 

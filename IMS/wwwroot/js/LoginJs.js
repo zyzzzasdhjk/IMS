@@ -124,11 +124,12 @@ function ConfirmEmailPost() {
         .then(response => response.json())
         .then(result => {
             console.log(result);
-            if (result.code !== 0){
+            console.log(result.status)
+            if (result.status !== 0){
                 ConfirmFailed(result.message);
             }else{
                 PostSuccess();
-                Uid = result.uid;
+                Uid = result.data;
                 RegisterUsername = user;
                 // 为了防止信息发送错误，应该在验证成功是锁住用户名和密码框
                 document.getElementById("RegisterUsername").readOnly = true;
@@ -169,7 +170,7 @@ function RegisterPost(){
         .then(response => response.json())
         .then(result => {
             console.log(result);
-            if (result.code !== 0){
+            if (result.status !== 0){
                 ConfirmFailed(result.message);
             }else{
                 Qmsg.success("注册成功");

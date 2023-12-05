@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace IMS;
+namespace IMS_API;
 
 public class EmailSetting
 {

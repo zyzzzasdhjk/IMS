@@ -75,10 +75,10 @@ public class UserService : IUserService
         return false;
     }
 
-    public UserRegisterReturnModel RegisterUser(string username, string password, string email)
+    public ResponseModel RegisterUser(string username, string password, string email)
     {
         /*判断用户名字是否过长或者为空*/
-        if (username.Length > 20 || username.Length <= 0)
+        /*if (username.Length > 20 || username.Length <= 0)
         {
             return new UserRegisterReturnModel(UserRegisterReturnStatus.UserNameIllegality);
         }
@@ -88,11 +88,11 @@ public class UserService : IUserService
             return new UserRegisterReturnModel(UserRegisterReturnStatus.EmailIllegality);
         }
 
-        /*判断密码是否合格*/
+        /*判断密码是否合格#1#
         if (!IsPasswordValid(password))
         {
             return new UserRegisterReturnModel(UserRegisterReturnStatus.PassWordIllegality);
-        }
+        }*/
 
         /*判断密码合格后对密码进行SHA加密*/
         password = PasswordHasher.HashPassword(password);
@@ -108,12 +108,11 @@ public class UserService : IUserService
             {
                 result.Read();
                 var resultUsername = result.GetValue(0).ToString();
-                var resultEmail = result.GetValue(1).ToString();
                 result.Close();
                 if (resultUsername == username)
                 {
-                    return new UserRegisterReturnModel(
-                        UserRegisterReturnStatus.UserNameRepeat);
+                    return new ResponseModel(
+                        StatusModel.Repeat,"用户名重复");
                 }
             }
 
@@ -143,10 +142,10 @@ public class UserService : IUserService
         }
         else
         {
-            return new UserRegisterReturnModel(UserRegisterReturnStatus.EmailError);
+            return new ResponseModel(StatusModel.ParameterInvalid,"邮件格式非法");
         }
 
-        return new UserRegisterReturnModel(uid);
+        return new ResponseModel(StatusModel.Success, "ok",uid);
     }
 
     public ResponseModel ResendEmail(int uid)
@@ -212,7 +211,7 @@ public class UserService : IUserService
         }
     }
 
-    public UserConfirmReturnModel ConfirmUser(int uid, int checkCode)
+    public ResponseModel ConfirmUser(int uid, int checkCode)
     {
         /*实现校验用户是否是未验证状态*/
         const string sql1 = "select status from web.User where uid = @uid";
@@ -224,7 +223,7 @@ public class UserService : IUserService
             {
                 if (Convert.ToString(result) != "UnConfirmed")
                 {
-                    return new UserConfirmReturnModel(UserConfirmReturnStatus.Completed);
+                    return new ResponseModel(StatusModel.Repeat, "用户已经验证过了");
                 }
             }
         }
@@ -239,10 +238,10 @@ public class UserService : IUserService
                 sqlCommand2.ExecuteNonQuery();
             }
 
-            return new UserConfirmReturnModel(UserConfirmReturnStatus.Success);
+            return new ResponseModel(StatusModel.Success);
         }
 
-        return new UserConfirmReturnModel(UserConfirmReturnStatus.Error);
+        return new ResponseModel(StatusModel.CheckCodeError, "验证码错误");
     }
 
     public ResponseModel LoginUser(string username, string password)

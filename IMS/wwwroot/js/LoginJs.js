@@ -7,6 +7,13 @@ let aContainer = document.querySelector("#a-container");
 let bContainer = document.querySelector("#b-container");
 let allButtons = document.querySelectorAll(".submit");
 
+// 修改message.js的设置
+Qmsg.config({
+    showClose:true,
+    timeout: 2000
+})
+
+var Uid= -1;
 let getButtons = (e) => e.preventDefault()
 
 let changeForm = (e) => {
@@ -58,7 +65,17 @@ function LoginPost() {
         .then(response => response.json())
         .then(result => {
             console.log(result);
-            if (result.status != 0){
+            if (result.status === 700){ // 邮箱未验证的情况
+                Qmsg.info("你的账号还未被验证");
+                data = result.data;
+                Uid = data.uid
+                Email = data.email
+                document.getElementById("RegisterUsername").value = document.getElementById("LoginUsername").value;
+                document.getElementById("RegisterPassword").value = "************";
+                document.getElementById("RegisterEmail").value = Email;
+                document.getElementById("GoLogin").click();
+            }
+            else if (result.status !== 0){
                 LoginFailed(result.message);
             }else{
                 LoginSuccess();
@@ -66,13 +83,6 @@ function LoginPost() {
         })
         .catch(error => console.log('error', error));
 }
-
-// 修改message.js的设置
-Qmsg.config({
-    showClose:true,
-    timeout: 2000
-})
-
 
 function LoginSuccess(){
     Qmsg.success("登录成功");
@@ -123,8 +133,8 @@ function ConfirmEmailPost() {
     fetch("https://localhost:7018/user/Register", requestOptions)
         .then(response => response.json())
         .then(result => {
-            console.log(result);
-            console.log(result.status)
+            /*console.log(result);
+            console.log(result.status)*/
             if (result.status !== 0){
                 ConfirmFailed(result.message);
             }else{
@@ -135,13 +145,13 @@ function ConfirmEmailPost() {
                 document.getElementById("RegisterUsername").readOnly = true;
                 document.getElementById("RegisterPassword").readOnly = true;
                 document.getElementById("RegisterEmail").readOnly = true;
-                console.log(Uid);
+                /*console.log(Uid);*/
             }
         })
         .catch(error => console.log('error', error));
 }
 
-var Uid = -1; // 存储发来的数据
+// var Uid = -1; // 存储发来的数据
 var RegisterUsername = "";
 
 function RegisterPost(){

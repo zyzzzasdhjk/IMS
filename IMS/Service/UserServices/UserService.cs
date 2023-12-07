@@ -97,8 +97,11 @@ public class UserService : IUserService
         /*判断密码合格后对密码进行SHA加密*/
         password = PasswordHasher.HashPassword(password);
 
+        
+        int uid = -1; // 插入数据后用户的id
+        
         /*查询是否存在相同的账号或者是邮箱，允许邮箱重复*/
-        const string sql = "select username,email from web.User " +
+        const string sql = $"select username,email,status,uid from web.User " +
                            "where username = @username";
         using (var sqlCommand = new MySqlCommand(sql, _d.GetConnection()))
         {
@@ -108,29 +111,35 @@ public class UserService : IUserService
             {
                 result.Read();
                 var resultUsername = result.GetValue(0).ToString();
-                result.Close();
-                if (resultUsername == username)
+                var status = result.GetValue(2).ToString();
+                if (status == "UnConfirmed")
                 {
+                    uid = Int32.Parse(result.GetValue(3).ToString() ?? "-1");
+                }
+                else if (resultUsername == username)
+                {
+                    result.Close();
                     return new ResponseModel(
                         StatusModel.Repeat,"用户名重复");
                 }
+                else
+                {
+                    /*开始向数据库插入用户的信息*/
+                    const string sql1 = "insert into web.User(username, password, status, email) " +
+                                        "value (@username,@password,'UnConfirmed',@email)";
+                    using (var sqlCommand1 = new MySqlCommand(sql1, _d.GetConnection()))
+                    {
+                        sqlCommand1.Parameters.AddWithValue("@username", username);
+                        sqlCommand1.Parameters.AddWithValue("@password", password);
+                        sqlCommand1.Parameters.AddWithValue("@email", email);
+                        sqlCommand1.ExecuteNonQuery();
+                        uid = Convert.ToInt32(sqlCommand1.LastInsertedId);
+                    }
+                }
             }
-
             result.Close();
         }
-
-        int uid; // 插入数据后用户的id
-        /*开始向数据库插入用户的信息*/
-        const string sql1 = "insert into web.User(username, password, status, email) " +
-                            "value (@username,@password,'UnConfirmed',@email)";
-        using (var sqlCommand = new MySqlCommand(sql1, _d.GetConnection()))
-        {
-            sqlCommand.Parameters.AddWithValue("@username", username);
-            sqlCommand.Parameters.AddWithValue("@password", password);
-            sqlCommand.Parameters.AddWithValue("@email", email);
-            sqlCommand.ExecuteNonQuery();
-            uid = Convert.ToInt32(sqlCommand.LastInsertedId);
-        }
+        
 
         // 如果上面的验证都通过了,生成一个随机的校验码
         var r = new Random();
@@ -247,7 +256,7 @@ public class UserService : IUserService
     public ResponseModel LoginUser(string username, string password)
     {
         /*根据账号进行查询*/
-        const string sql = "select uid,password,status from web.User where username = @username";
+        const string sql = "select uid,password,status,email from web.User where username = @username";
         using (var sqlCommand = new MySqlCommand(sql, _d.GetConnection()))
         {
             sqlCommand.Parameters.AddWithValue("@username", username);
@@ -263,6 +272,7 @@ public class UserService : IUserService
             var uid = Convert.ToInt32(result.GetValue(0)); // 用户ID
             var userPassword = result.GetValue(1).ToString(); // 用户密码
             var userStatus = result.GetValue(2).ToString(); // 用户状态
+            var userEmail = result.GetValue(3).ToString(); // 用户邮箱
             result.Close(); // 及时关闭，防止出现未关闭错误
 
             switch (userStatus)
@@ -271,7 +281,11 @@ public class UserService : IUserService
                     return new ResponseModel(StatusModel.Banned,"账号已经被封禁");
                 case "UnConfirmed":
                     return new ResponseModel(StatusModel.Unconfirmed, "用户账号未验证",
-                    JObject.FromObject(new {Uid = uid}));
+                    new
+                    {
+                        Uid = uid,
+                        Email = userEmail
+                    });
             }
 
             if (userPassword == null) //密码为空，什么数据库错误或者是账号数据错误

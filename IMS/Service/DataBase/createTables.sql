@@ -143,6 +143,13 @@ CREATE TABLE IF NOT EXISTS TaskMembers(
     foreign key (uid) references User(uid)
 );
 
+-- 队伍信息的视图
+CREATE VIEW TaskInfoView AS
+    SELECT taskId, name, description, status, created_at, end_at,
+    (SELECT uid FROM TaskMembers where TaskInfo.taskId = taskId and role = 'Admin') as masterId,
+    (SELECT name FROM UserInfo where uid = masterId)
+    FROM TaskInfo;
+
 -- 创建团队 参数为名字，描述和结束时间
 CREATE PROCEDURE CreateTask(IN ti int,IN n varchar(20),IN d text,IN t DATETIME)
 BEGIN

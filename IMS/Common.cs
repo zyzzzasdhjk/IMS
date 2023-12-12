@@ -26,7 +26,9 @@ public class Common
     public static readonly string MongoDbConnectString;
     public static readonly EmailSetting EmailServiceSetting = new EmailSetting();
     public static readonly ObjectStorageSetting ObjectStorageSetting = new ObjectStorageSetting();
-
+    public static readonly bool NeedAuth; // 判断是否要进行用户的身份认证，默认为开启
+    
+    
     static Common()
     {
         string jsonfile = "./WebAppSettings.json";
@@ -42,6 +44,8 @@ public class Common
                 {
                     throw new Exception("配置文件不完整");
                 }*/
+                
+                NeedAuth = (j["NeedAuth"] ?? Boolean.TrueString).ToObject<Boolean>();
 
                 // Mysql数据库连接字符串
                 var mysqlSetting = (JObject)(j["Mysql"] ?? new JObject());

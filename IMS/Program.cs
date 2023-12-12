@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using IMS.Data;
 using IMS.Service.DataBase;
+using IMS.Service.TaskService;
 using IMS.Service.TeamServices;
 using IMS.Service.UserServices;
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +22,7 @@ builder.Services.AddSingleton<IRelationalDataBase, MysqlDataBase>();
 builder.Services.AddSingleton<INosqlDataBase, MongoDataBase>();
 builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddSingleton<ITeamSqlService, TeamMysqlService>();
+builder.Services.AddSingleton<ITaskSqlService, TaskMysqlService>();
 
 // CORS 跨域
 builder.Services.AddCors(policy =>

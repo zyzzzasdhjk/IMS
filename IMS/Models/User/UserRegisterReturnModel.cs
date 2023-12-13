@@ -8,15 +8,11 @@ public enum UserRegisterReturnStatus
     PassWordIllegality = 3, // 密码不合格
     EmailRepeat = 4, // 邮箱重复
     EmailIllegality = 5, // 邮箱不合格
-    EmailError = 6, // 邮箱系统错误
+    EmailError = 6 // 邮箱系统错误
 }
 
 public class UserRegisterReturnModel
 {
-    public UserRegisterReturnStatus Code { get; set; } = UserRegisterReturnStatus.Success;
-    public string? Message { get; set; }
-    public int Uid { get; set; }
-
     public UserRegisterReturnModel(UserRegisterReturnStatus s)
     {
         switch (s)
@@ -57,4 +53,8 @@ public class UserRegisterReturnModel
         Uid = uid;
         Message = "注册成功！";
     }
+
+    public UserRegisterReturnStatus Code { get; set; } = UserRegisterReturnStatus.Success;
+    public string? Message { get; set; }
+    public int Uid { get; set; }
 }

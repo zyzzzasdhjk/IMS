@@ -4,6 +4,5 @@ public class TencentOos
 {
     public static void GetATemporaryKey()
     {
-        
     }
 }

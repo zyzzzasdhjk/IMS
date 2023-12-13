@@ -24,10 +24,7 @@ public class PasswordHasher
     public static bool CheckPassword(string password, string hashWithSalt)
     {
         var items = hashWithSalt.Split('|');
-        if (items.Length != 2)
-        {
-            return false;
-        }
+        if (items.Length != 2) return false;
 
         var hash = items[0];
         var salt = items[1];

@@ -1,6 +1,6 @@
 ﻿namespace IMS.Models.Team;
 
-public enum UserAppointResponseStatus 
+public enum UserAppointResponseStatus
 {
     Success, // 成功
     UserNonExist, // 用户不存在
@@ -10,9 +10,6 @@ public enum UserAppointResponseStatus
 
 public class UserAppointResponseModel
 {
-    public UserAppointResponseStatus Status { get; set; }
-    public string Message { get; set; }
-
     public UserAppointResponseModel(UserAppointResponseStatus status)
     {
         switch (status)
@@ -35,4 +32,7 @@ public class UserAppointResponseModel
                 break;
         }
     }
+
+    public UserAppointResponseStatus Status { get; set; }
+    public string Message { get; set; }
 }

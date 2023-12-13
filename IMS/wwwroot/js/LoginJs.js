@@ -9,17 +9,17 @@ let allButtons = document.querySelectorAll(".submit");
 
 // 修改message.js的设置
 Qmsg.config({
-    showClose:true,
+    showClose: true,
     timeout: 2000
 })
 
-var Uid= -1;
+var Uid = -1;
 let getButtons = (e) => e.preventDefault()
 
 let changeForm = (e) => {
 
     switchCtn.classList.add("is-gx");
-    setTimeout(function(){
+    setTimeout(function () {
         switchCtn.classList.remove("is-gx");
     }, 1500)
 
@@ -36,10 +36,10 @@ let changeForm = (e) => {
 
 let mainF = (e) => {
     for (var i = 0; i < allButtons.length; i++)
-        allButtons[i].addEventListener("click", getButtons );
+        allButtons[i].addEventListener("click", getButtons);
     for (var i = 0; i < switchBtn.length; i++)
         switchBtn[i].addEventListener("click", changeForm)
-    
+
 }
 
 window.addEventListener("load", mainF);
@@ -65,7 +65,7 @@ function LoginPost() {
         .then(response => response.json())
         .then(result => {
             console.log(result);
-            if (result.status === 700){ // 邮箱未验证的情况
+            if (result.status === 700) { // 邮箱未验证的情况
                 Qmsg.info("你的账号还未被验证");
                 data = result.data;
                 Uid = data.uid
@@ -74,38 +74,37 @@ function LoginPost() {
                 document.getElementById("RegisterPassword").value = "************";
                 document.getElementById("RegisterEmail").value = Email;
                 document.getElementById("GoLogin").click();
-            }
-            else if (result.status !== 0){
+            } else if (result.status !== 0) {
                 LoginFailed(result.message);
-            }else{
+            } else {
                 LoginSuccess();
             }
         })
         .catch(error => console.log('error', error));
 }
 
-function LoginSuccess(){
+function LoginSuccess() {
     Qmsg.success("登录成功");
     // 两秒后切换界面
-    setTimeout(2000,function (){
+    setTimeout(2000, function () {
         window.location.href = "https://localhost:7018/";
     })
     Qmsg.clear();
 }
 
-function LoginFailed(msg){
+function LoginFailed(msg) {
     Qmsg.error("登录失败:" + msg);
 }
 
 function ConfirmEmailPost() {
     let user = document.getElementById("RegisterUsername").value;
     let pass = document.getElementById("RegisterPassword").value;
-    let email = document.getElementById("RegisterEmail").value; 
-    if (user == null || user.length === 0 ||user.length < 4 || user.length > 16) {
+    let email = document.getElementById("RegisterEmail").value;
+    if (user == null || user.length === 0 || user.length < 4 || user.length > 16) {
         Qmsg.error("用户名不合法");
         return;
     }
-    if (pass == null || pass.length === 0 ||pass.length < 4 || pass.length > 16) {
+    if (pass == null || pass.length === 0 || pass.length < 4 || pass.length > 16) {
         Qmsg.error("密码不合法");
         return;
     }
@@ -135,9 +134,9 @@ function ConfirmEmailPost() {
         .then(result => {
             /*console.log(result);
             console.log(result.status)*/
-            if (result.status !== 0){
+            if (result.status !== 0) {
                 ConfirmFailed(result.message);
-            }else{
+            } else {
                 PostSuccess();
                 Uid = result.data;
                 RegisterUsername = user;
@@ -154,70 +153,70 @@ function ConfirmEmailPost() {
 // var Uid = -1; // 存储发来的数据
 var RegisterUsername = "";
 
-function RegisterPost(){
+function RegisterPost() {
     let ConfirmCode = document.getElementById("ConfirmCode").value;
-    if(ConfirmCode == null || ConfirmCode.length === 0){
+    if (ConfirmCode == null || ConfirmCode.length === 0) {
         Qmsg.error("验证码不能为空");
         return;
     }
-    
+
     var requestOptions = {
         method: 'POST',
         headers: CommonHeader,
         body: JSON.stringify({
-            "Uid" : Uid,
+            "Uid": Uid,
             "CheckCode": ConfirmCode
         }),
         redirect: 'follow'
     };
-    
+
     console.log(JSON.stringify({
-        "Uid" : Uid,
+        "Uid": Uid,
         "CheckCode": ConfirmCode
     }));
-    
+
     fetch("https://localhost:7018/user/confirm", requestOptions)
         .then(response => response.json())
         .then(result => {
             console.log(result);
-            if (result.status !== 0){
+            if (result.status !== 0) {
                 ConfirmFailed(result.message);
-            }else{
+            } else {
                 Qmsg.success("注册成功");
-                setTimeout(function (){
+                setTimeout(function () {
                     Qmsg.closeAll();
                     document.getElementById("GoLogin").click();
                     document.getElementById("LoginUsername").value = RegisterUsername;
-                },2000)
+                }, 2000)
             }
         })
         .catch(error => console.log('error', error));
 }
 
-function PostSuccess(){
+function PostSuccess() {
     Qmsg.success("验证邮件已经发送，请查收");
 }
 
-function ConfirmFailed(msg){
+function ConfirmFailed(msg) {
     Qmsg.error("错误:" + msg);
-} 
+}
 
-document.getElementById("Confirm").addEventListener("click",function (e){
+document.getElementById("Confirm").addEventListener("click", function (e) {
     ConfirmEmailPost();
     e.preventDefault();
 })
 
-document.getElementById("Register").addEventListener("click",function (e){
+document.getElementById("Register").addEventListener("click", function (e) {
     RegisterPost();
     e.preventDefault();
 })
 
-document.getElementById("Login").addEventListener("click",function (e){
+document.getElementById("Login").addEventListener("click", function (e) {
     LoginPost();
     e.preventDefault();
 })
 
-document.getElementById("ForgetPassword").addEventListener("click",function (e){
+document.getElementById("ForgetPassword").addEventListener("click", function (e) {
     Qmsg.info("私密马赛，这个功能还没实现哦！")
     e.preventDefault();
 })

@@ -7,14 +7,11 @@ public enum UserCreateTeamResponseStatus
     DescriptionIllegality = 2, // 团队描述不合格
     JoinCodeIllegality = 3, // 加入码不合格
     JoinCodeRepeat = 4, // 加入码重复
-    UnknownError = 5, // 未知错误
+    UnknownError = 5 // 未知错误
 }
 
 public class UserCreateTeamResponseModel
 {
-    public UserCreateTeamResponseStatus Code { get; set; }
-    public string? Message { get; set; }
-
     public UserCreateTeamResponseModel(UserCreateTeamResponseStatus s)
     {
         switch (s)
@@ -46,4 +43,7 @@ public class UserCreateTeamResponseModel
         }
         /*算一个数的所有因数*/
     }
+
+    public UserCreateTeamResponseStatus Code { get; set; }
+    public string? Message { get; set; }
 }

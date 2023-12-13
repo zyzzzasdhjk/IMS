@@ -23,32 +23,28 @@ public class UserController : Controller
     public JsonResult Login([FromBody] UserAccount user)
     {
         if (user.Username == null || user.Password == null)
-        {
-            return Json(new ReturnMessageModel("账号或者密码不能为空"));
-        }
+            return Json(new ResponseModel(StatusModel.ParameterInvalid, "账号或者密码不能为空"));
 
         var ls = _u.LoginUser(user.Username, user.Password);
         return Json(ls);
     }
 
     /// <summary>
-    /// 注册界面
+    ///     注册界面
     /// </summary>
     /// <param name="user"></param>
     /// <returns></returns>
     public JsonResult Register([FromBody] UserAccount user)
     {
         if (user.Username == null || user.Password == null)
-        {
-            return Json(new ReturnMessageModel("账号或者密码不能为空"));
-        }
+            return Json(new ResponseModel(StatusModel.ParameterInvalid, "账号或者密码不能为空"));
 
         var rs = _u.RegisterUser(user.Username, user.Password, user.Email ?? "");
         return Json(rs);
     }
 
     /// <summary>
-    /// 用户验证邮箱
+    ///     用户验证邮箱
     /// </summary>
     /// <param name="r"></param>
     /// <returns></returns>
@@ -59,7 +55,7 @@ public class UserController : Controller
 
     // 重发验证邮件
     /// <summary>
-    /// 重发验证邮件
+    ///     重发验证邮件
     /// </summary>
     /// <param name="r"></param>
     /// <returns></returns>
@@ -70,22 +66,20 @@ public class UserController : Controller
 
     // 用户重设验证邮箱
     /// <summary>
-    /// 用户重设验证邮箱
+    ///     用户重设验证邮箱
     /// </summary>
     /// <param name="r"></param>
     /// <returns></returns>
     public JsonResult ResetEmail([FromBody] RestEmailRequestModel r)
     {
         if (r.Email is null || r.Username is null)
-        {
             return Json(new ResponseModel(StatusModel.ParameterInvalid, "用户名或者邮箱不能为空"));
-        }
 
         return Json(_u.ResetEmail(r.Username, r.Email));
     }
 
     /// <summary>
-    /// 获取用户信息
+    ///     获取用户信息
     /// </summary>
     /// <param name="r"></param>
     /// <returns></returns>
@@ -97,11 +91,9 @@ public class UserController : Controller
     public JsonResult ResetPassword([FromBody] UidRequestModel u, [FromHeader] string authorization)
     {
         if (_u.IsAuthorization(u.Uid, authorization))
-        {
             return Json(new AuthorizationReturnModel(
                 _u.ResetPassword(u.Uid)
             ));
-        }
 
         return Json(new AuthorizationReturnModel());
     }
@@ -110,25 +102,21 @@ public class UserController : Controller
         [FromHeader] string authorization)
     {
         if (_u.IsAuthorization(u.Uid, authorization))
-        {
             return Json(
                 _u.ResetPasswordConfirm(u.Uid, u.Password, u.CheckCode)
             );
-        }
 
         return Json(new ResponseModel(StatusModel.AuthorizationError, "拒绝访问"));
     }
 
     /// <summary>
-    /// 获取OOS的校验码
+    ///     获取OOS的校验码
     /// </summary>
     /// <returns></returns>
-    public JsonResult Cos([FromBody] UidRequestModel u,[FromHeader] string authorization)
+    public JsonResult Cos([FromBody] UidRequestModel u, [FromHeader] string authorization)
     {
         if (_u.IsAuthorization(u.Uid, authorization))
-        {
             return Json(ObjectStorageService.GetUploadRight($"UserImage/{u.Uid}.*"));
-        }
         return Json(new ResponseModel(StatusModel.AuthorizationError, "拒绝访问"));
     }
 

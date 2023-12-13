@@ -5,8 +5,8 @@ namespace IMS_API;
 
 public class EmailSetting
 {
-    public string Host { get; set; } = "";
     public int Port;
+    public string Host { get; set; } = "";
     public string UserName { get; set; } = "";
     public string Password { get; set; } = "";
 }
@@ -24,28 +24,28 @@ public class Common
 {
     public static readonly string MysqlConnectString;
     public static readonly string MongoDbConnectString;
-    public static readonly EmailSetting EmailServiceSetting = new EmailSetting();
-    public static readonly ObjectStorageSetting ObjectStorageSetting = new ObjectStorageSetting();
+    public static readonly EmailSetting EmailServiceSetting = new();
+    public static readonly ObjectStorageSetting ObjectStorageSetting = new();
     public static readonly bool NeedAuth; // 判断是否要进行用户的身份认证，默认为开启
-    
-    
+
+
     static Common()
     {
-        string jsonfile = "./WebAppSettings.json";
+        var jsonfile = "./WebAppSettings.json";
 
-        using (StreamReader file = File.OpenText(jsonfile))
+        using (var file = File.OpenText(jsonfile))
         {
             // 数据库连接字符串的生成
-            using (JsonTextReader reader = new JsonTextReader(file))
+            using (var reader = new JsonTextReader(file))
             {
-                JObject j = (JObject)JToken.ReadFrom(reader);
+                var j = (JObject)JToken.ReadFrom(reader);
 
                 /*if (j.Property("Mysql") is null || j.Property("MongoDB") == null || j.Property("EmailSetting") == null)
                 {
                     throw new Exception("配置文件不完整");
                 }*/
-                
-                NeedAuth = (j["NeedAuth"] ?? Boolean.TrueString).ToObject<Boolean>();
+
+                NeedAuth = (j["NeedAuth"] ?? bool.TrueString).ToObject<bool>();
 
                 // Mysql数据库连接字符串
                 var mysqlSetting = (JObject)(j["Mysql"] ?? new JObject());
@@ -59,7 +59,7 @@ public class Common
                 /*ConnectString = j["DataBase"].ToString();*/
 
                 // MongoDB数据库连接字符串
-                JObject mongoDbSetting = (JObject)(j["MongoDB"] ?? new JObject());
+                var mongoDbSetting = (JObject)(j["MongoDB"] ?? new JObject());
                 /*MongoDbConnectString =
                     $"mongodb://{mongoDbSetting["username"]}:{mongoDbSetting["password"]}" +
                     $"@{mongoDbSetting["address"]}:{mongoDbSetting["port"]}/";
@@ -68,7 +68,7 @@ public class Common
                 /*ConnectString = j["DataBase"].ToString();*/
 
                 // 邮箱服务器连接字符串
-                JObject emailSettingObject = (JObject)(j["EmailSetting"] ?? new JObject());
+                var emailSettingObject = (JObject)(j["EmailSetting"] ?? new JObject());
                 EmailServiceSetting.Host = emailSettingObject["host"]?.ToString() ?? "";
                 EmailServiceSetting.Port = Convert.ToInt32(emailSettingObject["port"]);
                 EmailServiceSetting.UserName = emailSettingObject["usernmae"]?.ToString() ?? "";

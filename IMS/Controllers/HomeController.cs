@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using IMS.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace IMS.Controllers;
 
@@ -20,7 +20,7 @@ public class HomeController : Controller
     {
         return View();
     }
-    
+
     public IActionResult Login()
     {
         return View();

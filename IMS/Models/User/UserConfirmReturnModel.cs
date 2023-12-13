@@ -5,15 +5,11 @@ public enum UserConfirmReturnStatus
     Success = 0, // 成功
     NonExistent = 1, // 不存在
     Error = 2, // 超时
-    Completed = 3, // 已完成
+    Completed = 3 // 已完成
 }
-
 
 public class UserConfirmReturnModel
 {
-    public UserConfirmReturnStatus Code { get; set; } = UserConfirmReturnStatus.Success;
-    public string? Message { get; set; }
-
     public UserConfirmReturnModel(UserConfirmReturnStatus s)
     {
         switch (s)
@@ -36,4 +32,7 @@ public class UserConfirmReturnModel
                 break;
         }
     }
+
+    public UserConfirmReturnStatus Code { get; set; } = UserConfirmReturnStatus.Success;
+    public string? Message { get; set; }
 }

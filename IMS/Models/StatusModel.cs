@@ -11,6 +11,5 @@ public enum StatusModel
     Banned = 503, // 被封禁了
     Repeat = 504, // 重复
     Unknown = 999, // 未知错误
-    Unconfirmed = 700, // 未验证账号
-    
+    Unconfirmed = 700 // 未验证账号
 }

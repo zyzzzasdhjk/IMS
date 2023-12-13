@@ -8,9 +8,6 @@ public enum GetUserTeamsReturnStatus
 
 public class GetUserTeamsReturnModel
 {
-    public GetUserTeamsReturnStatus Code { get; set; }
-    public List<TeamItemModel> Teams { get; set; }
-
     public GetUserTeamsReturnModel(GetUserTeamsReturnStatus s)
     {
         Code = s;
@@ -22,4 +19,7 @@ public class GetUserTeamsReturnModel
         Code = GetUserTeamsReturnStatus.Success;
         Teams = l;
     }
+
+    public GetUserTeamsReturnStatus Code { get; set; }
+    public List<TeamItemModel> Teams { get; set; }
 }

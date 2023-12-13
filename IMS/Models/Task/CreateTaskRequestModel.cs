@@ -3,8 +3,8 @@
 public class CreateTaskRequestModel
 {
     public int CommandUid; // 指令发出者的uid
-    public int Uid;
+    public string Content = "";
     public int Tid;
     public string Title = "";
-    public string Content = "";
+    public int Uid;
 }

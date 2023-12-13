@@ -6,7 +6,7 @@ namespace IMS.Service.TaskService;
 
 public class TaskMysqlService : ITaskSqlService
 {
-    private IRelationalDataBase _r;
+    private readonly IRelationalDataBase _r;
 
     public TaskMysqlService(IRelationalDataBase r)
     {
@@ -47,7 +47,7 @@ public class TaskMysqlService : ITaskSqlService
                 ? new ResponseModel(StatusModel.Success, "分配任务成功")
                 : new ResponseModel(StatusModel.Unknown, "分配任务失败");
         }
-        
+
         catch (Exception e)
         {
             return new ResponseModel(StatusModel.Unknown, e.Message);
@@ -71,6 +71,7 @@ public class TaskMysqlService : ITaskSqlService
                 sqlCommand.ExecuteNonQuery();
                 sqlCommand.Parameters.Clear(); // 清楚参数
             }
+
             transaction.Commit();
             return new ResponseModel(StatusModel.Success, "ok");
         }
@@ -110,7 +111,7 @@ public class TaskMysqlService : ITaskSqlService
             return new ResponseModel(StatusModel.Unknown, e.Message);
         }
     }
-    
+
     // 删除多个任务成员
     public ResponseModel DeleteATaskMember(int tid, List<int> uidList)
     {
@@ -139,22 +140,19 @@ public class TaskMysqlService : ITaskSqlService
             return new ResponseModel(StatusModel.Unknown, e.Message);
         }
     }
-    
+
     // 查询任务的基本信息
     public ResponseModel GetTeamInfo(int tid)
     {
-        string sql = "SELECT taskId, name, description, status, created_at, end_at, name ,masterId " +
-                     "FROM TaskInfoView WHERE taskId = @tid";
+        var sql = "SELECT taskId, name, description, status, created_at, end_at, name ,masterId " +
+                  "FROM TaskInfoView WHERE taskId = @tid";
         using var sqlCommand = _r.GetConnection().CreateCommand();
         sqlCommand.CommandText = sql;
         sqlCommand.Parameters.AddWithValue("@tid", tid);
         try
         {
             var reader = sqlCommand.ExecuteReader();
-            if (!reader.HasRows)
-            {
-                return new ResponseModel(StatusModel.NonExist, "任务不存在");
-            }
+            if (!reader.HasRows) return new ResponseModel(StatusModel.NonExist, "任务不存在");
             // 从reader中获取信息
             reader.Read();
             var taskInfo = new TaskInfoModel
@@ -169,7 +167,7 @@ public class TaskMysqlService : ITaskSqlService
                 reader.GetInt32(7)
             );
             reader.Close();
-            return new ResponseModel(StatusModel.Success,"ok",taskInfo);
+            return new ResponseModel(StatusModel.Success, "ok", taskInfo);
         }
         catch (Exception e)
         {

@@ -8,7 +8,7 @@ using Newtonsoft.Json.Linq;
 namespace IMS.Service.FileService;
 
 /// <summary>
-/// 对象存储服务
+///     对象存储服务
 /// </summary>
 public class ObjectStorageService
 {
@@ -19,8 +19,9 @@ public class ObjectStorageService
     private static readonly string SecretKey = Common.ObjectStorageSetting.SecretKey;
     private static readonly CosXmlConfig Config;
     private static readonly QCloudCredentialProvider CosCredentialProvider;
-    
-    private static readonly string[] WritePolicy = {
+
+    private static readonly string[] WritePolicy =
+    {
         // 允许的操作范围，这里以上传操作为例
         "name/cos:PutObject",
         "name/cos:PostObject",
@@ -35,20 +36,20 @@ public class ObjectStorageService
     {
         "name/cos:GetObject"
     };
-    
+
     static ObjectStorageService()
     {
         Config = new CosXmlConfig.Builder()
-            .IsHttps(true)  //设置默认 HTTPS 请求
+            .IsHttps(true) //设置默认 HTTPS 请求
             .SetRegion(Region)
             .Build();
 
-       CosCredentialProvider = new DefaultQCloudCredentialProvider(SecretId, SecretKey, 15768000);
+        CosCredentialProvider = new DefaultQCloudCredentialProvider(SecretId, SecretKey, 15768000);
     }
 
     public static object GetReadRight(string path)
     {
-        Dictionary<string, object> values = new Dictionary<string, object>();
+        var values = new Dictionary<string, object>();
         values.Add("bucket", Bucket);
         values.Add("region", Region);
         values.Add("allowPrefix", path);
@@ -67,23 +68,23 @@ public class ObjectStorageService
             TmpSecretKey = credentials["TmpSecretKey"]?.ToString(),
             SecurityToken = credentials["Token"]?.ToString(),
             ExpiredTime = credential["ExpiredTime"],
-            StartTime = credential["StartTime"],
+            StartTime = credential["StartTime"]
         };
     }
-    
-    
+
+
     /// <summary>
-    /// 获取上传的权限
+    ///     获取上传的权限
     /// </summary>
     /// <param name="path">允许存放的文件名字</param>
     /// <returns></returns>
     public static object GetUploadRight(string path)
     {
-        string
+        var
             allowPrefix = path; // 这里改成允许的路径前缀，可以根据自己网站的用户登录态判断允许上传的具体路径，例子： a.jpg 或者 a/* 或者 * (使用通配符*存在重大安全风险, 请谨慎评估使用)
-        
 
-        Dictionary<string, object> values = new Dictionary<string, object>();
+
+        var values = new Dictionary<string, object>();
         values.Add("bucket", Bucket);
         values.Add("region", Region);
         values.Add("allowPrefix", allowPrefix);
@@ -110,9 +111,9 @@ public class ObjectStorageService
             TmpSecretKey = credentials["TmpSecretKey"]?.ToString(),
             SecurityToken = credentials["Token"]?.ToString(),
             ExpiredTime = credential["ExpiredTime"],
-            StartTime = credential["StartTime"],
+            StartTime = credential["StartTime"]
         };
-        
+
         /*string[] allowActions = new string[] {  // 允许的操作范围，这里以上传操作为例
             "name/cos:PutObject",
             "name/cos:PostObject",
@@ -126,21 +127,21 @@ public class ObjectStorageService
 
     public static string GetLongLink(string path)
     {
-        PreSignatureStruct preSignatureStruct = new PreSignatureStruct();
+        var preSignatureStruct = new PreSignatureStruct();
         // APPID 获取参考 https://console.cloud.tencent.com/developer
         preSignatureStruct.appid = Appid;
         // 存储桶所在地域, COS 地域的简称请参照 https://cloud.tencent.com/document/product/436/6224
-        preSignatureStruct.region = Region; 
+        preSignatureStruct.region = Region;
         // 存储桶名称，此处填入格式必须为 bucketname-APPID, 其中 APPID 获取参考 https://console.cloud.tencent.com/developer
         preSignatureStruct.bucket = Bucket;
         preSignatureStruct.key = path; //对象键
         preSignatureStruct.httpMethod = "GET"; //HTTP 请求方法
         preSignatureStruct.isHttps = true; //生成 HTTPS 请求 URL
-        preSignatureStruct.signDurationSecond = 15768000;  // 5个月 //请求签名时间为600s
-        preSignatureStruct.headers = null;//签名中需要校验的 header
+        preSignatureStruct.signDurationSecond = 15768000; // 5个月 //请求签名时间为600s
+        preSignatureStruct.headers = null; //签名中需要校验的 header
         preSignatureStruct.queryParameters = null; //签名中需要校验的 URL 中请求参数
-        
+
         CosXml s = new CosXmlServer(Config, CosCredentialProvider);
-        return (s.GenerateSignURL(preSignatureStruct));
+        return s.GenerateSignURL(preSignatureStruct);
     }
 }

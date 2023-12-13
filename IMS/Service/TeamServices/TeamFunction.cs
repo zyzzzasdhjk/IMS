@@ -5,7 +5,7 @@ namespace IMS.Service.TeamServices;
 public class TeamFunction
 {
     /// <summary>
-    /// 生成团队id，9位，由大写字母和数字组成
+    ///     生成团队id，9位，由大写字母和数字组成
     /// </summary>
     /// <returns></returns>
     public static string GenerateJoinCode()
@@ -14,7 +14,7 @@ public class TeamFunction
     }
 
     /// <summary>
-    /// 校验用户所给的JoinCode是否是有效的
+    ///     校验用户所给的JoinCode是否是有效的
     /// </summary>
     /// <param name="s"></param>
     /// <returns></returns>
@@ -22,9 +22,10 @@ public class TeamFunction
     {
         if (s.Length == 9)
         {
-            Regex regex = new Regex(@"^(?=.*[A-Z])(?=.*\d)(?!.*[a-z]).{9}$");
+            var regex = new Regex(@"^(?=.*[A-Z])(?=.*\d)(?!.*[a-z]).{9}$");
             return regex.IsMatch(s);
         }
+
         return false;
     }
 }

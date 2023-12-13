@@ -2,9 +2,6 @@
 
 public class JoinTeamResponseModel
 {
-    public CommonStatus Status { get; set; }
-    public string Message { get; set; }
-
     public JoinTeamResponseModel(CommonStatus s)
     {
         switch (s)
@@ -33,4 +30,7 @@ public class JoinTeamResponseModel
         Status = CommonStatus.Unknown;
         Message = msg;
     }
+
+    public CommonStatus Status { get; set; }
+    public string Message { get; set; }
 }

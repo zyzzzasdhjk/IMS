@@ -2,7 +2,7 @@
 
 public class MemberInfoModel
 {
-    string Name { get; set; } = "";
-    int Uid { get; set; }
-    string Role { get; set; } = "";
+    private string Name { get; set; } = "";
+    private int Uid { get; set; }
+    private string Role { get; set; } = "";
 }

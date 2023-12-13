@@ -10,18 +10,16 @@ public class DataBaseFunction
         while (result.Read())
         {
             var dict = new Dictionary<string, object>();
-            for (var i = 0; i < result.FieldCount; i++)
-            {
-                dict.Add(result.GetName(i), result.GetValue(i));
-            }
+            for (var i = 0; i < result.FieldCount; i++) dict.Add(result.GetName(i), result.GetValue(i));
             list.Add(dict);
         }
+
         return list;
     }
 
-    
+
     /// <summary>
-    /// 解析错误1062出现的列名
+    ///     解析错误1062出现的列名
     /// </summary>
     /// <param name="s"></param>
     /// <returns></returns>

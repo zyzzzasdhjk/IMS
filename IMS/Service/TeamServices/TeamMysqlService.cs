@@ -53,7 +53,7 @@ public class TeamMysqlService : ITeamSqlService
     }
 
 
-    public JoinTeamResponseModel JoinTeam(int uid, string joinCode)
+    public ResponseModel JoinTeam(int uid, string joinCode)
     {
         try
         {
@@ -64,7 +64,7 @@ public class TeamMysqlService : ITeamSqlService
             {
                 sqlCommand.Parameters.AddWithValue("@joinCode", joinCode);
                 var result = sqlCommand.ExecuteScalar();
-                if (result == null) return new JoinTeamResponseModel(CommonStatus.NonExist); // 不存在验证码当然是不存在这个团队咯
+                if (result == null) return new ResponseModel(StatusModel.NonExist, "团队不存在"); // 不存在验证码当然是不存在这个团队咯
 
                 tid = Convert.ToInt32(result);
             }
@@ -75,18 +75,18 @@ public class TeamMysqlService : ITeamSqlService
             {
                 sqlCommand.Parameters.AddWithValue("@uid", uid);
                 sqlCommand.Parameters.AddWithValue("@tid", tid);
-                if (sqlCommand.ExecuteNonQuery() != 1) return new JoinTeamResponseModel(CommonStatus.Unknown); // 未知错误
+                if (sqlCommand.ExecuteNonQuery() != 1) return new ResponseModel(StatusModel.Unknown, "未知错误"); // 未知错误
             }
 
-            return new JoinTeamResponseModel(CommonStatus.Success);
+            return new ResponseModel(StatusModel.Success, "加入团队成功");
         }
         catch (MySqlException e)
         {
-            return new JoinTeamResponseModel(e.Number + " " + e.Message); // 返回错误信息
+            return new ResponseModel(StatusModel.Unknown, e.Message); // 返回错误信息
         }
     }
 
-    public JoinTeamResponseModel JoinTeam(int uid, int tid)
+    public ResponseModel JoinTeam(int uid, int tid)
     {
         try
         {
@@ -96,7 +96,7 @@ public class TeamMysqlService : ITeamSqlService
             {
                 sqlCommand.Parameters.AddWithValue("@tid", tid);
                 var result = sqlCommand.ExecuteScalar();
-                if (result == null) return new JoinTeamResponseModel(CommonStatus.NonExist);
+                if (result == null) return new ResponseModel(StatusModel.NonExist, "团队不存在");
             }
 
             // 更新数据库中用户的信息
@@ -105,14 +105,14 @@ public class TeamMysqlService : ITeamSqlService
             {
                 sqlCommand.Parameters.AddWithValue("@uid", uid);
                 sqlCommand.Parameters.AddWithValue("@tid", tid);
-                if (sqlCommand.ExecuteNonQuery() != 1) return new JoinTeamResponseModel(CommonStatus.Unknown); // 未知错误
+                if (sqlCommand.ExecuteNonQuery() != 1) return new ResponseModel(StatusModel.Unknown, "未知错误");// 未知错误
             }
 
-            return new JoinTeamResponseModel(CommonStatus.Success);
+            return new ResponseModel(StatusModel.Success, "加入团队成功");
         }
         catch (Exception e)
         {
-            return new JoinTeamResponseModel(e.Message); // 返回错误信息
+            return new ResponseModel(StatusModel.Unknown, e.Message); // 返回错误信息
         }
     }
 
@@ -252,9 +252,9 @@ public class TeamMysqlService : ITeamSqlService
         }
     }
 
-    public GetUserTeamsReturnModel GetUserTeams(int uid)
+    public ResponseModel GetUserTeams(int uid)
     {
-        if (!_m.IsUserStatusNormal(uid)) return new GetUserTeamsReturnModel(GetUserTeamsReturnStatus.Error);
+        // if (!_m.IsUserStatusNormal(uid)) return new ResponseModel();
 
         var connection = _m.GetConnection();
         const string sql = "select tid,name,description,PeopleNumber from web.UserTeamsView where uid = @uid";
@@ -265,7 +265,7 @@ public class TeamMysqlService : ITeamSqlService
             if (!result.HasRows) // 如果没有查询到值，就返回错误
             {
                 result.Close();
-                return new GetUserTeamsReturnModel(GetUserTeamsReturnStatus.Error);
+                return new ResponseModel(StatusModel.NonExist,"查询的团队不存在");
             }
 
             try
@@ -278,12 +278,12 @@ public class TeamMysqlService : ITeamSqlService
 
                 result.Close();
 
-                return new GetUserTeamsReturnModel(list);
+                return new ResponseModel(StatusModel.Success,"ok",list);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return new GetUserTeamsReturnModel(GetUserTeamsReturnStatus.Error);
+                return new ResponseModel(StatusModel.Unknown, e.Message);
             }
         }
     }

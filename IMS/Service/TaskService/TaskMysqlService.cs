@@ -34,6 +34,8 @@ public class TaskMysqlService : ITaskSqlService
         }
     }
 
+    
+
     public ResponseModel AssignTask(int tid, int uid)
     {
         const string sql = "INSERT INTO TaskMembers (taskId, uid, role) VALUES (@tid, @uid, 'Member')";
@@ -142,7 +144,7 @@ public class TaskMysqlService : ITaskSqlService
     }
 
     // 查询任务的基本信息
-    public ResponseModel GetTeamInfo(int tid)
+    public ResponseModel GetTaskInfo(int tid)
     {
         var sql = "SELECT taskId, name, description, status, created_at, end_at, name ,masterId " +
                   "FROM TaskInfoView WHERE taskId = @tid";

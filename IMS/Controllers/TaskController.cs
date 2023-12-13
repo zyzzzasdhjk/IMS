@@ -44,6 +44,25 @@ public class TaskController : Controller
         }
     }
 
+    // 查询团队信息
+    /// <summary>
+    /// 查询团队信息
+    /// </summary>
+    /// <param name="tid"></param>
+    /// <param name="authorization"></param>
+    /// <returns></returns>
+    public JsonResult GetTaskInfo([FromBody] TaskIdRequestModel t, [FromHeader] string authorization)
+    {
+        try
+        {
+            return Json(_t.GetTaskInfo(t.TaskId));
+        }
+        catch (Exception e)
+        {
+            return Json(new ResponseModel(StatusModel.Unknown, e.Message));
+        }
+    }
+
     /// <summary>
     ///     为一个任务指派一个成员
     /// </summary>

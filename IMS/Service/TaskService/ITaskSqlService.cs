@@ -5,7 +5,7 @@ namespace IMS.Service.TaskService;
 public interface ITaskSqlService
 {
     /// <summary>
-    ///     创建一个任务
+    /// 创建一个任务
     /// </summary>
     /// <param name="uid"></param>
     /// <param name="tid">创建任务所在的队伍</param>
@@ -14,6 +14,14 @@ public interface ITaskSqlService
     /// <returns></returns>
     public ResponseModel CreateTask(int uid, int tid, string title, string content);
 
+    // 获取任务的信息
+    /// <summary>
+    /// 获取任务的信息
+    /// </summary>
+    /// <param name="tid"></param>
+    /// <returns></returns>
+    public ResponseModel GetTaskInfo(int tid);
+    
     /// <summary>
     ///     添加多个用户到任务
     /// </summary>

@@ -30,7 +30,7 @@ public interface ITeamSqlService
     /// <param name="uid"></param>
     /// <param name="joinCode"></param>
     /// <returns></returns>
-    public JoinTeamResponseModel JoinTeam(int uid, string joinCode);
+    public ResponseModel JoinTeam(int uid, string joinCode);
 
     /// <summary>
     ///     根据tid加入团队
@@ -38,7 +38,7 @@ public interface ITeamSqlService
     /// <param name="uid"></param>
     /// <param name="tid"></param>
     /// <returns></returns>
-    public JoinTeamResponseModel JoinTeam(int uid, int tid);
+    public ResponseModel JoinTeam(int uid, int tid);
 
     /// <summary>
     ///     用户退出团队
@@ -62,7 +62,7 @@ public interface ITeamSqlService
     /// </summary>
     /// <param name="uid"></param>
     /// <returns></returns>
-    public GetUserTeamsReturnModel GetUserTeams(int uid);
+    public ResponseModel GetUserTeams(int uid);
 
     /// <summary>
     ///     团队创建者删除掉团队

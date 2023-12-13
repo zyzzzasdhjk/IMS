@@ -395,4 +395,31 @@ public class UserService : IUserService
             return new ResponseModel(StatusModel.Unknown, "后端错误");
         }
     }
+
+    public ResponseModel UpdateUserInfo(int uid, string name, string description, string gender, DateTime birthday)
+    {
+        try
+        {
+            string sql = "UPDATE web.UserInfo SET web.UserInfo.name = @name," +
+                         "web.UserInfo.description = @description," +
+                         "web.UserInfo.gender = @gender," +
+                         "web.UserInfo.birthday = @birthday " +
+                         "WHERE web.UserInfo.uid = @uid";
+            using var sqlCommand = new MySqlCommand(sql, _d.GetConnection());
+
+            sqlCommand.Parameters.AddWithValue("@name", name);
+            sqlCommand.Parameters.AddWithValue("@description", description);
+            sqlCommand.Parameters.AddWithValue("@gender", gender);
+            sqlCommand.Parameters.AddWithValue("@birthday", birthday);
+            sqlCommand.Parameters.AddWithValue("@uid", uid);
+            var changeRow = sqlCommand.ExecuteNonQuery();
+            if (changeRow == 1)
+                return new ResponseModel(StatusModel.Success, "ok");
+            return new ResponseModel(StatusModel.Unknown, "后端错误");
+        }
+        catch (Exception e)
+        {
+            return new ResponseModel(StatusModel.Unknown, e.Message);
+        }
+    }
 }

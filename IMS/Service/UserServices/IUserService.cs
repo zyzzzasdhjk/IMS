@@ -78,5 +78,22 @@ public interface IUserService
     /// <returns></returns>
     public ResponseModel ResetPasswordConfirm(int uid, string newPwd, string checkCode);
 
+    /// <summary>
+    /// 获取用户信息
+    /// </summary>
+    /// <param name="uid"></param>
+    /// <returns></returns>
     public ResponseModel GetUserInfo(int uid);
+    
+    // 修改用户信息
+    /// <summary>
+    /// 修改用户个人信息
+    /// </summary>
+    /// <param name="uid"></param>
+    /// <param name="name"></param>
+    /// <param name="description"></param>
+    /// <param name="gender"></param>
+    /// <param name="birthday"></param>
+    /// <returns></returns>
+    public ResponseModel UpdateUserInfo(int uid, string name,string description,string gender,DateTime birthday);
 }

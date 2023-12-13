@@ -1,4 +1,5 @@
-﻿using IMS.Models;
+﻿using IMS_API;
+using IMS.Models;
 using IMS.Models.User;
 using IMS.Service.FileService;
 using IMS.Service.UserServices;
@@ -106,6 +107,20 @@ public class UserController : Controller
                 _u.ResetPasswordConfirm(u.Uid, u.Password, u.CheckCode)
             );
 
+        return Json(new ResponseModel(StatusModel.AuthorizationError, "拒绝访问"));
+    }
+    
+    // 用户修改个人信息
+    /// <summary>
+    /// 用户修改个人信息
+    /// </summary>
+    /// <param name="u"></param>
+    /// <param name="authorization"></param>
+    /// <returns></returns>
+    public JsonResult UpdateUserInfo([FromBody] ModifyUserInformationRequestModel u, [FromHeader] string authorization)
+    {
+        if (!Common.NeedAuth || _u.IsAuthorization(u.Uid, authorization))
+            return Json(_u.UpdateUserInfo(u.Uid,u.Name,u.Description,u.Gender,u.Birthday));
         return Json(new ResponseModel(StatusModel.AuthorizationError, "拒绝访问"));
     }
 

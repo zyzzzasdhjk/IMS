@@ -30,12 +30,12 @@ public class TaskController : Controller
     /// <param name="c"></param>
     /// <param name="authorization"></param>
     /// <returns></returns>
-    public JsonResult CreateTask(CreateTaskRequestModel c, [FromHeader] string authorization)
+    public JsonResult CreateTask([FromBody]CreateTaskRequestModel c, [FromHeader] string authorization)
     {
         try
         {
             if (!Common.NeedAuth || _u.IsAuthorization(c.CommandUid, authorization))
-                return Json(_t.CreateTask(c.Uid, c.Tid, c.Title, c.Content));
+                return Json(_t.CreateTask(c.Uid,c.Tid,  c.Title, c.Content,c.EndTime));
             return Json(new ResponseModel(StatusModel.AuthorizationError, "禁止未知用户执行次操作"));
         }
         catch (Exception e)
@@ -48,13 +48,17 @@ public class TaskController : Controller
     /// <summary>
     /// 查询团队信息
     /// </summary>
-    /// <param name="tid"></param>
+    /// <param name="t"></param>
     /// <param name="authorization"></param>
     /// <returns></returns>
     public JsonResult GetTaskInfo([FromBody] TaskIdRequestModel t, [FromHeader] string authorization)
     {
         try
         {
+            if (t.TaskId == -1)
+            {
+                return Json(new ResponseModel(StatusModel.ParameterInvalid,"参数错误"));
+            }
             return Json(_t.GetTaskInfo(t.TaskId));
         }
         catch (Exception e)
@@ -64,12 +68,12 @@ public class TaskController : Controller
     }
 
     /// <summary>
-    ///     为一个任务指派一个成员
+    /// 为一个任务指派一个成员
     /// </summary>
     /// <param name="a"></param>
     /// <param name="authorization"></param>
     /// <returns></returns>
-    public JsonResult AssignTaskMember(AssignTaskMemberRequestModel a, [FromHeader] string authorization)
+    public JsonResult AssignTaskMember([FromBody]AssignTaskMemberRequestModel a, [FromHeader] string authorization)
     {
         try
         {
@@ -85,17 +89,17 @@ public class TaskController : Controller
 
     // 为一个任务指派多个成员
     /// <summary>
-    ///     为一个任务指派多个成员
+    /// 为一个任务指派多个成员
     /// </summary>
     /// <param name="a"></param>
     /// <param name="authorization"></param>
     /// <returns></returns>
-    public JsonResult AssignTaskMembers(AssignTaskMembersRequestModel a, [FromHeader] string authorization)
+    public JsonResult AssignTaskMembers([FromBody]AssignTaskMembersRequestModel a, [FromHeader] string authorization)
     {
         try
         {
             if (!Common.NeedAuth || _u.IsAuthorization(a.CommandUid, authorization))
-                return Json(_t.AssignTask(a.Tid, a.Uid));
+                return Json(_t.AssignTask(a.Tid, a.Uids));
 
             return Json(new ResponseModel(StatusModel.AuthorizationError, "禁止未知用户执行次操作"));
         }
@@ -104,7 +108,54 @@ public class TaskController : Controller
             return Json(new ResponseModel(StatusModel.Unknown, e.Message));
         }
     }
+    
+    // 获取任务成员信息
+    /// <summary>
+    /// 获取任务成员信息
+    /// </summary>
+    /// <param name="t"></param>
+    /// <param name="authorization"></param>
+    /// <returns></returns>
+    public JsonResult GetTaskMembers([FromBody] TaskIdRequestModel t, [FromHeader] string authorization)
+    {
+        try
+        {
+            if (t.TaskId == -1)
+            {
+                return Json(new ResponseModel(StatusModel.ParameterInvalid, "参数错误"));
+            }
 
+            if (!Common.NeedAuth || _u.IsAuthorization(t.TaskId, authorization))
+                return Json(_t.GetTaskMembers(t.TaskId));
+            return Json(new ResponseModel(StatusModel.AuthorizationError, "禁止未知用户执行次操作"));
+        }
+        catch (Exception e)
+        {
+            return Json(new ResponseModel(StatusModel.Unknown, e.Message));
+        }
+    }
+
+    // 创建任务的子任务
+    /// <summary>
+    /// 创建任务的子任务
+    /// </summary>
+    /// <param name="c">和创建团队任务是通用的，只不过这个tid是父任务的id</param>
+    /// <param name="authorization"></param>
+    /// <returns></returns>
+    public JsonResult CreateSubTask([FromBody] CreateTaskRequestModel c, [FromHeader] string authorization)
+    {
+        try
+        {
+            if (!Common.NeedAuth || _u.IsAuthorization(c.CommandUid, authorization))
+                return Json(_t.CreateSubTask(c.Tid, c.Uid, c.Title, c.Content, c.EndTime));
+            return Json(new ResponseModel(StatusModel.AuthorizationError, "禁止未知用户执行次操作"));
+        }
+        catch (Exception e)
+        {
+            return Json(new ResponseModel(StatusModel.Unknown, e.Message));
+        }
+    }
+    
     public class SubmitTaskFile
     {
         public int Tid { get; set; }

@@ -3,6 +3,6 @@
 public class AssignTaskMembersRequestModel
 {
     public int CommandUid { get; set; } // 指令发出者的uid
-    public List<int> Uid { get; set; } = new();
+    public int[] Uids { get; set; } = new []{0};
     public int Tid { get; set; }
 }

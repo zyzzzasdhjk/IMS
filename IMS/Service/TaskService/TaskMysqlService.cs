@@ -1,6 +1,8 @@
-﻿using IMS.Models;
+﻿using System.Data;
+using IMS.Models;
 using IMS.Models.Task;
 using IMS.Service.DataBase;
+using MySql.Data.MySqlClient;
 
 namespace IMS.Service.TaskService;
 
@@ -13,20 +15,31 @@ public class TaskMysqlService : ITaskSqlService
         _r = r;
     }
 
-    public ResponseModel CreateTask(int uid, int tid, string title, string content)
+    public ResponseModel CreateTask(int tid,  int uid, string title, string content,DateTime? endTime)
     {
-        const string sql = "INSERT INTO task (uid, tid, title, content) VALUES (@uid, @tid, @title, @content)";
-        using var sqlCommand = _r.GetConnection().CreateCommand();
-        sqlCommand.CommandText = sql;
-        sqlCommand.Parameters.AddWithValue("@uid", uid);
-        sqlCommand.Parameters.AddWithValue("@tid", tid);
-        sqlCommand.Parameters.AddWithValue("@title", title);
-        sqlCommand.Parameters.AddWithValue("@content", content);
         try
         {
-            return sqlCommand.ExecuteNonQuery() == 1
-                ? new ResponseModel(StatusModel.Success, "创建任务成功")
-                : new ResponseModel(StatusModel.Unknown, "创建任务失败");
+            using var sqlCommand = new MySqlCommand();
+            sqlCommand.Connection = _r.GetConnection();
+            const string sql = "CreateTask";
+            sqlCommand.CommandText = sql;
+            sqlCommand.CommandType = CommandType.StoredProcedure;
+            sqlCommand.Parameters.AddWithValue("@ti", tid).Direction = ParameterDirection.Input;
+            sqlCommand.Parameters.AddWithValue("@ui", uid).Direction = ParameterDirection.Input;
+            sqlCommand.Parameters.AddWithValue("@n", title).Direction = ParameterDirection.Input;
+            sqlCommand.Parameters.AddWithValue("@d", content).Direction = ParameterDirection.Input;
+            sqlCommand.Parameters.AddWithValue("@t", endTime).Direction = ParameterDirection.Input;
+            // 执行存储过程
+            sqlCommand.Parameters.Add("@msg", MySqlDbType.Text).Direction = ParameterDirection.Output;
+            // 执行存储过程
+            var result = sqlCommand.ExecuteScalar().ToString();
+            // 从参数的Value属性中获取返回值
+            if (result == "ok")
+            {
+                return new ResponseModel(StatusModel.Success, "ok");
+            }
+
+            return new ResponseModel(StatusModel.ParameterInvalid, result);
         }
         catch (Exception e)
         {
@@ -56,7 +69,7 @@ public class TaskMysqlService : ITaskSqlService
         }
     }
 
-    public ResponseModel AssignTask(int tid, List<int> uidList)
+    public ResponseModel AssignTask(int tid, int[] uidList)
     {
         using var connection = _r.GetConnection();
         using var transaction = connection.BeginTransaction();
@@ -80,6 +93,67 @@ public class TaskMysqlService : ITaskSqlService
         catch (Exception e)
         {
             transaction.Rollback();
+            return new ResponseModel(StatusModel.Unknown, e.Message);
+        }
+    }
+
+    public ResponseModel GetTaskMembers(int tid)
+    {
+        var sql = "SELECT uid, name, role, created_at FROM web.TaskMembersView WHERE taskId = @tid";
+        using var sqlCommand = _r.GetConnection().CreateCommand();
+        sqlCommand.CommandText = sql;
+        sqlCommand.Parameters.AddWithValue("@tid", tid);
+        try
+        {
+            var result = new List<TaskMemberInfoModel>();
+            using var reader = sqlCommand.ExecuteReader();
+            while (reader.Read())
+            {
+                result.Add(new TaskMemberInfoModel
+                {
+                    Uid = reader.GetInt32(0),
+                    Name = reader.GetString(1),
+                    Role = reader.GetString(2),
+                    CreatedAt = reader.GetDateTime(3)
+                });
+            }
+            reader.Close();
+            return new ResponseModel(StatusModel.Success, "ok", result);
+        }
+        catch (Exception e)
+        {
+            return new ResponseModel(StatusModel.Unknown, e.Message);
+        }
+    }
+
+    public ResponseModel CreateSubTask(int tid,  int uid, string title, string content,DateTime? endTime)
+    {
+        try
+        {
+            using var sqlCommand = new MySqlCommand();
+            sqlCommand.Connection = _r.GetConnection();
+            const string sql = "CreateSubTask";
+            sqlCommand.CommandText = sql;
+            sqlCommand.CommandType = CommandType.StoredProcedure;
+            sqlCommand.Parameters.AddWithValue("@ti", tid).Direction = ParameterDirection.Input;
+            sqlCommand.Parameters.AddWithValue("@ui", uid).Direction = ParameterDirection.Input;
+            sqlCommand.Parameters.AddWithValue("@n", title).Direction = ParameterDirection.Input;
+            sqlCommand.Parameters.AddWithValue("@d", content).Direction = ParameterDirection.Input;
+            sqlCommand.Parameters.AddWithValue("@t", endTime).Direction = ParameterDirection.Input;
+            // 执行存储过程
+            sqlCommand.Parameters.Add("@msg", MySqlDbType.Text).Direction = ParameterDirection.Output;
+            // 执行存储过程
+            var result = sqlCommand.ExecuteScalar().ToString();
+            // 从参数的Value属性中获取返回值
+            if (result == "ok")
+            {
+                return new ResponseModel(StatusModel.Success, "ok");
+            }
+
+            return new ResponseModel(StatusModel.ParameterInvalid, result);
+        }
+        catch (Exception e)
+        {
             return new ResponseModel(StatusModel.Unknown, e.Message);
         }
     }
@@ -146,7 +220,7 @@ public class TaskMysqlService : ITaskSqlService
     // 查询任务的基本信息
     public ResponseModel GetTaskInfo(int tid)
     {
-        var sql = "SELECT taskId, name, description, status, created_at, end_at, name ,masterId " +
+        var sql = $"SELECT taskId, name, description, status, created_at, end_at, MasterName ,masterId " +
                   "FROM TaskInfoView WHERE taskId = @tid";
         using var sqlCommand = _r.GetConnection().CreateCommand();
         sqlCommand.CommandText = sql;

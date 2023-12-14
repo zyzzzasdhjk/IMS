@@ -12,3 +12,5 @@ INSERT INTO web.TaskMembers(taskId, uid, role) value
     (1, 1, 'Admin');
 INSERT INTO web.TaskMembers(taskId, uid, role) value
     (1, 2, 'Member');
+
+CALL CreateTask(1, 1, '测试任务描述', '1', '2024-01-01 00:00:00');

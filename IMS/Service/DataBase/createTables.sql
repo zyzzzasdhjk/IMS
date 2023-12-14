@@ -113,13 +113,13 @@ END;
 -- 任务表
 CREATE TABLE TaskInfo
 (
-    taskId      int primary key,
+    taskId      int primary key auto_increment,
     name        varchar(20),
     description text,
     status      enum ('Incomplete','Complete','Timeout','Abandon') default 'Incomplete',
     -- proportion int, -- 分值，用于计算总的进度和当前进度
     created_at  DATETIME                                           default CURRENT_TIMESTAMP null,
-    end_at      DATETIME                                                                     not null, -- 预计的完成时间,如果是null的话，就代表是没有结束时间限制
+    end_at      DATETIME ,           -- null表述没有结束期限                                                     
     updated_at  DATETIME                                           default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP
 );
 
@@ -162,16 +162,54 @@ SELECT taskId,
        status,
        created_at,
        end_at,
-       (SELECT uid FROM TaskMembers where TaskInfo.taskId = taskId and role = 'Admin') as masterId,
-       (SELECT name FROM UserInfo where uid = masterId)
+       (SELECT uid FROM TaskMembers where TaskInfo.taskId = taskId and role = 'Admin') 'MasterId',
+       (SELECT name FROM UserInfo where uid = MasterId) 'MasterName'
 FROM TaskInfo;
 
--- 创建团队 参数为名字，描述和结束时间
-CREATE PROCEDURE CreateTask(IN ti int, IN n varchar(20), IN d text, IN t DATETIME)
+-- 团队成员的视图
+CREATE VIEW TaskMembersView AS
+SELECT T.taskId,T.uid, U.name, T.role, T.created_at
+FROM TaskMembers AS T
+         LEFT JOIN UserInfo AS U ON T.uid = U.uid;
+
+-- 创建任务 参数为名字，描述和结束时间
+CREATE PROCEDURE CreateTask(IN ti int, IN ui int,IN n varchar(20), IN d text, IN t DATETIME)
 BEGIN
+    DECLARE taski int;
+    DECLARE msg text;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION  -- 发生错误后退出
+        BEGIN 
+            GET DIAGNOSTICS CONDITION 1
+                msg = MESSAGE_TEXT;
+            SELECT msg;
+            ROLLBACK ;
+        END;
     INSERT INTO TaskInfo (name, description, end_at) VALUES (n, d, t);
-    INSERT INTO TeamTasks (tid, taskId) VALUES (ti, LAST_INSERT_ID());
+    SET taski = LAST_INSERT_ID();
+    INSERT INTO TeamTasks (tid, taskId) VALUES (ti, taski);
+    INSERT INTO TaskMembers (taskId, uid, role) VALUES (taski, ui, 'Admin');
+    SELECT 'ok'; 
 END;
+
+-- 创建任务的子任务
+CREATE PROCEDURE CreateSubTask(IN ti int, IN ui int,IN n varchar(20), IN d text)
+BEGIN
+    DECLARE taski int;
+    DECLARE msg text;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION  -- 发生错误后退出
+        BEGIN 
+            GET DIAGNOSTICS CONDITION 1
+                msg = MESSAGE_TEXT;
+            SELECT msg;
+            ROLLBACK ;
+        END;
+    INSERT INTO TaskInfo (name, description) VALUES (n, d);
+    SET taski = LAST_INSERT_ID();
+    INSERT INTO TaskSubtasks (taskId, subtaskId) VALUES (ti, taski);
+    INSERT INTO TaskMembers (taskId, uid, role) VALUES (taski, ui, 'Member');
+    SELECT 'ok'; 
+END;
+
 
 -- 删除团队 删除团队的时候删除全部的团队成员
 CREATE TRIGGER DeleteTask

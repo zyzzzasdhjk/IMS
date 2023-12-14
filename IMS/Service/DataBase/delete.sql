@@ -1,9 +1,9 @@
 ﻿use web;
 DROP VIEW web.TeamMemberView;
-DROP VIEW web.userteamsview;
-DROP TABLE web.taskmembers;
+DROP VIEW web.UserTeamsView;
+DROP TABLE web.TaskMembers;
 DROP TABLE web.TaskSubtasks;
-DROP TABLE web.teamtasks;
+DROP TABLE web.TeamTasks;
 DROP TABLE web.TaskInfo;
 DROP TABLE web.TeamMember;
 DROP TABLE web.TeamInfo;

@@ -32,7 +32,7 @@ public class TaskMysqlService : ITaskSqlService
             // 执行存储过程
             sqlCommand.Parameters.Add("@msg", MySqlDbType.Text).Direction = ParameterDirection.Output;
             // 执行存储过程
-            var result = sqlCommand.ExecuteScalar().ToString();
+            var result = sqlCommand.ExecuteScalar().ToString() ?? "null";
             // 从参数的Value属性中获取返回值
             if (result == "ok")
             {
@@ -143,7 +143,7 @@ public class TaskMysqlService : ITaskSqlService
             // 执行存储过程
             sqlCommand.Parameters.Add("@msg", MySqlDbType.Text).Direction = ParameterDirection.Output;
             // 执行存储过程
-            var result = sqlCommand.ExecuteScalar().ToString();
+            var result = sqlCommand.ExecuteScalar().ToString() ?? "null";
             // 从参数的Value属性中获取返回值
             if (result == "ok")
             {

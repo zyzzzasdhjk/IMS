@@ -60,18 +60,17 @@ public class Common
 
                 // MongoDB数据库连接字符串
                 var mongoDbSetting = (JObject)(j["MongoDB"] ?? new JObject());
-                /*MongoDbConnectString =
+                MongoDbConnectString =
                     $"mongodb://{mongoDbSetting["username"]}:{mongoDbSetting["password"]}" +
                     $"@{mongoDbSetting["address"]}:{mongoDbSetting["port"]}/";
-                */
-                MongoDbConnectString = $"mongodb://{mongoDbSetting["address"]}:{mongoDbSetting["port"]}/";
+                // MongoDbConnectString = $"mongodb://{mongoDbSetting["address"]}:{mongoDbSetting["port"]}/";
                 /*ConnectString = j["DataBase"].ToString();*/
 
                 // 邮箱服务器连接字符串
                 var emailSettingObject = (JObject)(j["EmailSetting"] ?? new JObject());
                 EmailServiceSetting.Host = emailSettingObject["host"]?.ToString() ?? "";
                 EmailServiceSetting.Port = Convert.ToInt32(emailSettingObject["port"]);
-                EmailServiceSetting.UserName = emailSettingObject["usernmae"]?.ToString() ?? "";
+                EmailServiceSetting.UserName = emailSettingObject["username"]?.ToString() ?? "";
                 EmailServiceSetting.Password = emailSettingObject["password"]?.ToString() ?? "";
 
                 // 对象存储所需的数据

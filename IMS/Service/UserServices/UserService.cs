@@ -64,7 +64,7 @@ public class UserService : IUserService
         using (var sqlCommand = new MySqlCommand(sql, _d.GetConnection()))
         {
             sqlCommand.Parameters.AddWithValue("@username", username);
-            var result = sqlCommand.ExecuteReader();
+            using var result = sqlCommand.ExecuteReader();
             if (result.HasRows) // 当存在数据的时候，说明有邮箱或者是用户名重复了
             {
                 result.Read();
@@ -80,19 +80,20 @@ public class UserService : IUserService
                     return new ResponseModel(
                         StatusModel.Repeat, "用户名重复");
                 }
-                else
+            }
+            else
+            {
+                result.Close();
+                /*开始向数据库插入用户的信息*/
+                const string sql1 = "insert into web.User(username, password, status, email) " +
+                                    "value (@username,@password,'UnConfirmed',@email)";
+                using (var sqlCommand1 = new MySqlCommand(sql1, _d.GetConnection()))
                 {
-                    /*开始向数据库插入用户的信息*/
-                    const string sql1 = "insert into web.User(username, password, status, email) " +
-                                        "value (@username,@password,'UnConfirmed',@email)";
-                    using (var sqlCommand1 = new MySqlCommand(sql1, _d.GetConnection()))
-                    {
-                        sqlCommand1.Parameters.AddWithValue("@username", username);
-                        sqlCommand1.Parameters.AddWithValue("@password", password);
-                        sqlCommand1.Parameters.AddWithValue("@email", email);
-                        sqlCommand1.ExecuteNonQuery();
-                        uid = Convert.ToInt32(sqlCommand1.LastInsertedId);
-                    }
+                    sqlCommand1.Parameters.AddWithValue("@username", username);
+                    sqlCommand1.Parameters.AddWithValue("@password", password);
+                    sqlCommand1.Parameters.AddWithValue("@email", email);
+                    sqlCommand1.ExecuteNonQuery();
+                    uid = Convert.ToInt32(sqlCommand1.LastInsertedId);
                 }
             }
 

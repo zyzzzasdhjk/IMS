@@ -178,10 +178,10 @@ public class MongoDataBase : INosqlDataBase
     [BsonIgnoreExtraElements]
     private class UserCode
     {
-        public readonly string CheckCode;
-        public readonly DateTime CreateAt; // readonly 只能在初始化的时候被修改
+        public string CheckCode;
+        public DateTime CreateAt; // readonly 只能在初始化的时候被修改
 
-        public readonly int Uid;
+        public int Uid;
         /*设置readonly时会导致插入的空的文档*/
 
         public UserCode(int uid, string code)

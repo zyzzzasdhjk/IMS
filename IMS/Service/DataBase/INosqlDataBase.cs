@@ -14,7 +14,7 @@ public interface INosqlDataBase
     public IMongoCollection<BsonDocument> GetUserCollectionBase();
 
     /// <summary>
-    ///     向集合中插入用户的邮箱验证码，过期时间30min
+    /// 向集合中插入用户的邮箱验证码，过期时间30min
     /// </summary>
     /// <param name="uid"></param>
     /// <param name="checkCode"></param>

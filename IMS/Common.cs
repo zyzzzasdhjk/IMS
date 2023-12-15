@@ -33,6 +33,11 @@ public class Common
     {
         var jsonfile = "./WebAppSettings.json";
 
+        if (!File.Exists(jsonfile))
+        {
+            throw new Exception("配置文件不存在");
+        }
+        
         using (var file = File.OpenText(jsonfile))
         {
             // 数据库连接字符串的生成
@@ -40,10 +45,10 @@ public class Common
             {
                 var j = (JObject)JToken.ReadFrom(reader);
 
-                /*if (j.Property("Mysql") is null || j.Property("MongoDB") == null || j.Property("EmailSetting") == null)
+                if (j.Property("Mysql") is null || j.Property("MongoDB") == null || j.Property("EmailSetting") == null)
                 {
                     throw new Exception("配置文件不完整");
-                }*/
+                }
 
                 NeedAuth = (j["NeedAuth"] ?? bool.TrueString).ToObject<bool>();
 

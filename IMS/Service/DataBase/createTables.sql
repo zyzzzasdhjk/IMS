@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS TaskMembers
     foreign key (uid) references User (uid)
 );
 
--- 队伍信息的视图
+-- 任务信息的视图
 CREATE VIEW TaskInfoView AS
 SELECT taskId,
        name,
@@ -165,6 +165,12 @@ SELECT taskId,
        (SELECT uid FROM TaskMembers where TaskInfo.taskId = taskId and role = 'Admin') 'MasterId',
        (SELECT name FROM UserInfo where uid = MasterId) 'MasterName'
 FROM TaskInfo;
+
+-- 查看队伍下的所有的任务
+CREATE VIEW TeamTasksView AS
+SELECT T.tid, T.taskId, I.name,  I.status , I.MasterId , I.MasterName
+FROM TeamTasks AS T
+         LEFT JOIN TaskInfoView AS I ON T.taskId = I.taskId;
 
 -- 团队成员的视图
 CREATE VIEW TaskMembersView AS

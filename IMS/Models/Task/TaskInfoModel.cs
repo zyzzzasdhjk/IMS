@@ -19,13 +19,18 @@ public class TaskInfoModel
         Master = master;
         MasterUid = masterUid;
     }
+    
+    public TaskInfoModel()
+    {
+        
+    }
 
     public int TaskId { get; set; }
     public string Name { get; set; } = "";
-    public string Description { get; set; } = "";
+    public string? Description { get; set; }
     public string Status { get; set; } = "";
-    public DateTime CreateTime { get; set; }
-    public DateTime EndTime { get; set; }
+    public DateTime? CreateTime { get; set; }
+    public DateTime? EndTime { get; set; }
     public string Master { get; set; } = ""; // 任务主管人员的名字
     public int MasterUid { get; set; } // 任务主管人员的uid
 }

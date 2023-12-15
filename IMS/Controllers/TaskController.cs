@@ -1,6 +1,7 @@
 ﻿using IMS_API;
 using IMS.Models;
 using IMS.Models.Task;
+using IMS.Models.Team;
 using IMS.Service.TaskService;
 using IMS.Service.UserServices;
 using Microsoft.AspNetCore.Mvc;
@@ -148,6 +149,27 @@ public class TaskController : Controller
         {
             if (!Common.NeedAuth || _u.IsAuthorization(c.CommandUid, authorization))
                 return Json(_t.CreateSubTask(c.Tid, c.Uid, c.Title, c.Content, c.EndTime));
+            return Json(new ResponseModel(StatusModel.AuthorizationError, "禁止未知用户执行次操作"));
+        }
+        catch (Exception e)
+        {
+            return Json(new ResponseModel(StatusModel.Unknown, e.Message));
+        }
+    }
+    
+    // 获取队伍所属的所有任务
+    /// <summary>
+    /// 获取队伍所属的所有任务
+    /// </summary>
+    /// <param name="t"></param>
+    /// <param name="authorization"></param>
+    /// <returns></returns>
+    public JsonResult GetTeamTasks([FromBody] TaskRequestModel t, [FromHeader] string authorization)
+    {
+        try
+        {
+            if (!Common.NeedAuth || _u.IsAuthorization(t.Uid, authorization))
+                return Json(_t.GetTeamTasks(t.Tid));
             return Json(new ResponseModel(StatusModel.AuthorizationError, "禁止未知用户执行次操作"));
         }
         catch (Exception e)

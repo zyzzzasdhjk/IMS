@@ -15,7 +15,7 @@ public class TaskMysqlService : ITaskSqlService
         _r = r;
     }
 
-    public ResponseModel CreateTask(int tid,  int uid, string title, string content,DateTime? endTime)
+    public ResponseModel CreateTask(int tid, int uid, string title, string content, DateTime? endTime)
     {
         try
         {
@@ -34,10 +34,7 @@ public class TaskMysqlService : ITaskSqlService
             // 执行存储过程
             var result = sqlCommand.ExecuteScalar().ToString() ?? "null";
             // 从参数的Value属性中获取返回值
-            if (result == "ok")
-            {
-                return new ResponseModel(StatusModel.Success, "ok");
-            }
+            if (result == "ok") return new ResponseModel(StatusModel.Success, "ok");
 
             return new ResponseModel(StatusModel.ParameterInvalid, result);
         }
@@ -47,7 +44,6 @@ public class TaskMysqlService : ITaskSqlService
         }
     }
 
-    
 
     public ResponseModel AssignTask(int tid, int uid)
     {
@@ -108,7 +104,6 @@ public class TaskMysqlService : ITaskSqlService
             var result = new List<TaskMemberInfoModel>();
             using var reader = sqlCommand.ExecuteReader();
             while (reader.Read())
-            {
                 result.Add(new TaskMemberInfoModel
                 {
                     Uid = reader.GetInt32(0),
@@ -116,7 +111,6 @@ public class TaskMysqlService : ITaskSqlService
                     Role = reader.GetString(2),
                     CreatedAt = reader.GetDateTime(3)
                 });
-            }
             reader.Close();
             return new ResponseModel(StatusModel.Success, "ok", result);
         }
@@ -126,7 +120,7 @@ public class TaskMysqlService : ITaskSqlService
         }
     }
 
-    public ResponseModel CreateSubTask(int tid,  int uid, string title, string content,DateTime? endTime)
+    public ResponseModel CreateSubTask(int tid, int uid, string title, string content, DateTime? endTime)
     {
         try
         {
@@ -145,12 +139,37 @@ public class TaskMysqlService : ITaskSqlService
             // 执行存储过程
             var result = sqlCommand.ExecuteScalar().ToString() ?? "null";
             // 从参数的Value属性中获取返回值
-            if (result == "ok")
-            {
-                return new ResponseModel(StatusModel.Success, "ok");
-            }
+            if (result == "ok") return new ResponseModel(StatusModel.Success, "ok");
 
             return new ResponseModel(StatusModel.ParameterInvalid, result);
+        }
+        catch (Exception e)
+        {
+            return new ResponseModel(StatusModel.Unknown, e.Message);
+        }
+    }
+
+    // 查询队伍的任务
+    public ResponseModel GetTeamTasks(int tid)
+    {
+        try
+        {
+            const string sql = "select taskId,name,status,MasterId,MasterName from web.TeamTasksView where Tid = @tid";
+            using var sqlCommand = _r.GetConnection().CreateCommand();
+            sqlCommand.CommandText = sql;
+            sqlCommand.Parameters.AddWithValue("@tid", tid);
+            using var reader = sqlCommand.ExecuteReader();
+            var result = new List<TaskInfoModel>();
+            while (reader.Read())
+                result.Add(new TaskInfoModel
+                {
+                    TaskId = reader.GetInt32(0),
+                    Name = reader.GetString(1),
+                    Status = reader.GetString(2),
+                    MasterUid = reader.GetInt32(3),
+                    Master = reader.GetString(4)
+                });
+            return new ResponseModel(StatusModel.Success, "ok",result);
         }
         catch (Exception e)
         {
@@ -220,7 +239,7 @@ public class TaskMysqlService : ITaskSqlService
     // 查询任务的基本信息
     public ResponseModel GetTaskInfo(int tid)
     {
-        var sql = $"SELECT taskId, name, description, status, created_at, end_at, MasterName ,masterId " +
+        var sql = "SELECT taskId, name, description, status, created_at, end_at, MasterName ,masterId " +
                   "FROM TaskInfoView WHERE taskId = @tid";
         using var sqlCommand = _r.GetConnection().CreateCommand();
         sqlCommand.CommandText = sql;

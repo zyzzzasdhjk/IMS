@@ -58,6 +58,8 @@ public interface ITaskSqlService
     /// <param name="endTime"></param>
     /// <returns></returns>
     public ResponseModel CreateSubTask(int tid,  int uid, string title, string content,DateTime? endTime);
+
+    public ResponseModel GetTeamTasks(int tid);
     
     /// <summary>
     ///     删除掉任务中的一个用户

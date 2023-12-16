@@ -172,6 +172,12 @@ SELECT T.tid, T.taskId, I.name,  I.status , I.MasterId , I.MasterName
 FROM TeamTasks AS T
          LEFT JOIN TaskInfoView AS I ON T.taskId = I.taskId;
 
+-- 任务的全部子任务
+CREATE VIEW TaskSubtasksView AS
+SELECT T.taskId, T.subtaskId, I.name,  I.status , I.MasterId , I.MasterName
+FROM TaskSubtasks AS T
+         LEFT JOIN TaskInfoView AS I ON T.subtaskId = I.taskId; 
+
 -- 团队成员的视图
 CREATE VIEW TaskMembersView AS
 SELECT T.taskId,T.uid, U.name, T.role, T.created_at
@@ -212,7 +218,7 @@ BEGIN
     INSERT INTO TaskInfo (name, description) VALUES (n, d);
     SET taski = LAST_INSERT_ID();
     INSERT INTO TaskSubtasks (taskId, subtaskId) VALUES (ti, taski);
-    INSERT INTO TaskMembers (taskId, uid, role) VALUES (taski, ui, 'Member');
+    INSERT INTO TaskMembers (taskId, uid, role) VALUES (taski, ui, 'Admin');
     SELECT 'ok'; 
 END;
 

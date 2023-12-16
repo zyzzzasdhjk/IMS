@@ -60,6 +60,8 @@ public interface ITaskSqlService
     public ResponseModel CreateSubTask(int tid,  int uid, string title, string content,DateTime? endTime);
 
     public ResponseModel GetTeamTasks(int tid);
+
+    public ResponseModel GetTaskSubtasks(int tid);
     
     /// <summary>
     ///     删除掉任务中的一个用户

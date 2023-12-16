@@ -177,6 +177,33 @@ public class TaskMysqlService : ITaskSqlService
         }
     }
 
+    public ResponseModel GetTaskSubtasks(int tid)
+    {
+        try
+        {
+            const string sql = "select subtaskId,name,status,MasterId,MasterName from web.TaskSubtasksView where taskId = @tid";
+            using var sqlCommand = _r.GetConnection().CreateCommand();
+            sqlCommand.CommandText = sql;
+            sqlCommand.Parameters.AddWithValue("@tid", tid);
+            using var reader = sqlCommand.ExecuteReader();
+            var result = new List<TaskInfoModel>();
+            while (reader.Read())
+                result.Add(new TaskInfoModel
+                {
+                    TaskId = reader.GetInt32(0),
+                    Name = reader.GetString(1),
+                    Status = reader.GetString(2),
+                    MasterUid = reader.GetInt32(3),
+                    Master = reader.GetString(4)
+                });
+            return new ResponseModel(StatusModel.Success, "ok",result);
+        }
+        catch (Exception e)
+        {
+            return new ResponseModel(StatusModel.Unknown, e.Message);
+        }
+    }
+
     public ResponseModel SubmitTaskFile(int tid, int uid, List<string> path)
     {
         throw new NotImplementedException();

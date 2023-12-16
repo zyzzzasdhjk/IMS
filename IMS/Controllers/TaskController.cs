@@ -19,6 +19,7 @@ public class TaskController : Controller
         _u = u;
     }
 
+    
 
     public JsonResult Index([FromBody] SubmitTaskFile s)
     {
@@ -170,6 +171,27 @@ public class TaskController : Controller
         {
             if (!Common.NeedAuth || _u.IsAuthorization(t.Uid, authorization))
                 return Json(_t.GetTeamTasks(t.Tid));
+            return Json(new ResponseModel(StatusModel.AuthorizationError, "禁止未知用户执行次操作"));
+        }
+        catch (Exception e)
+        {
+            return Json(new ResponseModel(StatusModel.Unknown, e.Message));
+        }
+    }
+    
+    // 获取任务的全部子任务
+    /// <summary>
+    /// 获取任务的全部子任务
+    /// </summary>
+    /// <param name="t"></param>
+    /// <param name="authorization"></param>
+    /// <returns></returns>
+    public JsonResult GetTaskSubtasks([FromBody] TaskRequestModel t, [FromHeader] string authorization)
+    {
+        try
+        {
+            if (!Common.NeedAuth || _u.IsAuthorization(t.Uid, authorization))
+                return Json(_t.GetTaskSubtasks(t.Tid));
             return Json(new ResponseModel(StatusModel.AuthorizationError, "禁止未知用户执行次操作"));
         }
         catch (Exception e)

@@ -1,7 +1,6 @@
 ﻿using IMS_API;
 using IMS.Models;
 using IMS.Models.Task;
-using IMS.Models.Team;
 using IMS.Service.TaskService;
 using IMS.Service.UserServices;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +18,20 @@ public class TaskController : Controller
         _u = u;
     }
 
+    /// <summary>
+    /// 检查参数是否符合要求
+    /// </summary>
+    /// <param name="t"></param>
+    /// <param name="paras"></param>
+    /// <returns></returns>
+    private bool ParametricTest(TaskRequestModel t, List<string> paras)
+    {
+        foreach (var p in paras)
+        {
+            if (t.GetType().GetProperty(p) == null) return false;
+        }
+        return true;
+    }
     
 
     public JsonResult Index([FromBody] SubmitTaskFile s)
@@ -200,6 +213,27 @@ public class TaskController : Controller
         }
     }
     
+    // 修改任务的信息
+    /// <summary>
+    /// 修改任务的信息
+    /// </summary>
+    /// <param name="t"></param>
+    /// <param name="authorization"></param>
+    /// <returns></returns>
+    public JsonResult UpdateTask([FromBody] TaskRequestModel t, [FromHeader] string authorization)
+    {
+        try
+        {
+            if (!Common.NeedAuth || _u.IsAuthorization(t.Uid, authorization))
+                return Json(_t.UpdateTask(t.Tid, t.Title, t.Description,t.Status, t.EndTime));
+            return Json(new ResponseModel(StatusModel.AuthorizationError, "禁止未知用户执行次操作"));
+        }
+        catch (Exception e)
+        {
+            return Json(new ResponseModel(StatusModel.Unknown, e.Message));
+        }
+    }
+
     public class SubmitTaskFile
     {
         public int Tid { get; set; }

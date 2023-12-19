@@ -11,9 +11,26 @@ public interface IRelationalDataBase
     public MySqlConnection GetConnection();
 
     /// <summary>
-    ///     判断用户的状态是否正常
+    /// 执行需要参数的非查询语句，返回受影响的列数
     /// </summary>
-    /// <param name="uid"></param>
+    /// <param name="sql"></param>
+    /// <param name="d"></param>
     /// <returns></returns>
-    public bool IsUserStatusNormal(int uid);
+    public int ExecuteNonQueryWithParameters(string sql, Dictionary<string, object> d);
+    
+    /// <summary>
+    /// 执行需要参数的单格查询语句，返回查询结果
+    /// </summary>
+    /// <param name="sql"></param>
+    /// <param name="d"></param>
+    /// <returns></returns>
+    public object? ExecuteScalarWithParameters(string sql, Dictionary<string, object> d);
+
+    /// <summary>
+    /// 执行需要参数的存储过程，返回存储过程的信息
+    /// </summary>
+    /// <param name="sql"></param>
+    /// <param name="d"></param>
+    /// <returns></returns>
+    public object? ExecuteProducerWithParameters(string sql, Dictionary<string, object> d);
 }

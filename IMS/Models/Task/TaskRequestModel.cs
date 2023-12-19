@@ -6,6 +6,7 @@ public class TaskRequestModel
     public int Tid { get; set; } // 队伍id
     public int Uid { get; set; }
     public string Title { get; set; }
-    public string Content { get; set; }
-    public string EndTime { get; set; }
+    public string Status { get; set; } // 项目状态
+    public string Description { get; set; }
+    public DateTime? EndTime { get; set; }
 }

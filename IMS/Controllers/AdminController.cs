@@ -25,7 +25,7 @@ public class AdminController : Controller
     }
 
     /// <summary>
-    ///     获取上传静态资源的权限
+    /// 获取上传静态资源的权限
     /// </summary>
     /// <returns></returns>
     public JsonResult UploadStaticResources()

@@ -39,16 +39,40 @@ public class MysqlDataBase : IRelationalDataBase
         return _connection;
     }
 
-    public bool IsUserStatusNormal(int uid)
+    
+    public int ExecuteNonQueryWithParameters(string sql, Dictionary<string, object> d)
     {
-        var c = GetConnection();
-        const string sql = "select count(*) from web.User " +
-                           "where uid = @uid and  status = 'Normal'";
-        using (var sqlCommand = new MySqlCommand(sql, c))
+        using var command = GetConnection().CreateCommand();
+        command.CommandText = sql;
+        foreach (var para in d)
         {
-            sqlCommand.Parameters.AddWithValue("@uid", uid);
-            var result = sqlCommand.ExecuteScalar();
-            return Convert.ToInt32(result) > 0;
+            command.Parameters.AddWithValue(para.Key, para.Value);
         }
+        return command.ExecuteNonQuery();
+    }
+
+    public object? ExecuteScalarWithParameters(string sql, Dictionary<string, object> d)
+    {
+        using var command = GetConnection().CreateCommand();
+        command.CommandText = sql;
+        foreach (var para in d)
+        {
+            command.Parameters.AddWithValue(para.Key, para.Value);
+        }
+        return command.ExecuteScalar();
+    }
+    
+    public object? ExecuteProducerWithParameters(string sql, Dictionary<string, object> d)
+    {
+        using var command = GetConnection().CreateCommand();
+        command.CommandText = sql;
+        command.CommandType = CommandType.StoredProcedure;
+        foreach (var para in d)
+        {
+            command.Parameters.AddWithValue(para.Key, para.Value).Direction = ParameterDirection.Input;
+        }
+        // 要求所有的存储过程必须实现一个输出的msg
+        command.Parameters.Add("@msg", MySqlDbType.Int32).Direction = ParameterDirection.Output;
+        return command.ExecuteScalar();
     }
 }

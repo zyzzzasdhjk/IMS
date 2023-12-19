@@ -296,4 +296,26 @@ public class TaskMysqlService : ITaskSqlService
             return new ResponseModel(StatusModel.Unknown, e.Message);
         }
     }
+
+    public ResponseModel UpdateTask(int tid, string name, string description, string status, DateTime? endTime)
+    {
+        const string sql = "UPDATE TaskInfo SET name = @name, description = @description, status = @status, end_at = @end_at WHERE taskId = @tid";
+        using var sqlCommand = _r.GetConnection().CreateCommand();
+        sqlCommand.CommandText = sql;
+        sqlCommand.Parameters.AddWithValue("@tid", tid);
+        sqlCommand.Parameters.AddWithValue("@name", name);
+        sqlCommand.Parameters.AddWithValue("@description", description);
+        sqlCommand.Parameters.AddWithValue("@status", status);
+        sqlCommand.Parameters.AddWithValue("@end_at", endTime);
+        try
+        {
+            return sqlCommand.ExecuteNonQuery() == 1
+                ? new ResponseModel(StatusModel.Success, "更新任务成功")
+                : new ResponseModel(StatusModel.NonExist, "更新任务失败");
+        }
+        catch (Exception e)
+        {
+            return new ResponseModel(StatusModel.Unknown, e.Message);
+        }
+    }
 }

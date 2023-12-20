@@ -47,14 +47,17 @@ public class TaskMysqlService : ITaskSqlService
 
     public ResponseModel AssignTask(int tid, int uid)
     {
-        const string sql = "INSERT INTO TaskMembers (taskId, uid, role) VALUES (@tid, @uid, 'Member')";
-        using var sqlCommand = _r.GetConnection().CreateCommand();
-        sqlCommand.CommandText = sql;
-        sqlCommand.Parameters.AddWithValue("@tid", tid);
-        sqlCommand.Parameters.AddWithValue("@uid", uid);
         try
         {
-            return sqlCommand.ExecuteNonQuery() == 1
+            var r = _r.ExecuteNonQueryWithParameters(
+                "INSERT INTO TaskMembers (taskId, uid, role) VALUES (@tid, @uid, 'Member')",
+                new Dictionary<string, object?>
+                {
+                    { "@tid", tid },
+                    { "@uid", uid }
+                }
+            );
+            return r == 1
                 ? new ResponseModel(StatusModel.Success, "分配任务成功")
                 : new ResponseModel(StatusModel.Unknown, "分配任务失败");
         }
@@ -95,14 +98,16 @@ public class TaskMysqlService : ITaskSqlService
 
     public ResponseModel GetTaskMembers(int tid)
     {
-        var sql = "SELECT uid, name, role, created_at FROM web.TaskMembersView WHERE taskId = @tid";
-        using var sqlCommand = _r.GetConnection().CreateCommand();
-        sqlCommand.CommandText = sql;
-        sqlCommand.Parameters.AddWithValue("@tid", tid);
         try
         {
             var result = new List<TaskMemberInfoModel>();
-            using var reader = sqlCommand.ExecuteReader();
+            using var reader = _r.ExecuteReaderWithParameters(
+                "SELECT uid, name, role, created_at FROM web.TaskMembersView WHERE taskId = @tid",
+                new Dictionary<string, object?>
+                {
+                    { "@tid", tid }
+                }
+            );
             while (reader.Read())
                 result.Add(new TaskMemberInfoModel
                 {
@@ -110,7 +115,8 @@ public class TaskMysqlService : ITaskSqlService
                     Name = reader.GetString(1),
                     Role = reader.GetString(2),
                     CreatedAt = reader.GetDateTime(3)
-                });
+                }
+            );
             reader.Close();
             return new ResponseModel(StatusModel.Success, "ok", result);
         }
@@ -169,7 +175,7 @@ public class TaskMysqlService : ITaskSqlService
                     MasterUid = reader.GetInt32(3),
                     Master = reader.GetString(4)
                 });
-            return new ResponseModel(StatusModel.Success, "ok",result);
+            return new ResponseModel(StatusModel.Success, "ok", result);
         }
         catch (Exception e)
         {
@@ -181,7 +187,8 @@ public class TaskMysqlService : ITaskSqlService
     {
         try
         {
-            const string sql = "select subtaskId,name,status,MasterId,MasterName from web.TaskSubtasksView where taskId = @tid";
+            const string sql =
+                "select subtaskId,name,status,MasterId,MasterName from web.TaskSubtasksView where taskId = @tid";
             using var sqlCommand = _r.GetConnection().CreateCommand();
             sqlCommand.CommandText = sql;
             sqlCommand.Parameters.AddWithValue("@tid", tid);
@@ -196,7 +203,7 @@ public class TaskMysqlService : ITaskSqlService
                     MasterUid = reader.GetInt32(3),
                     Master = reader.GetString(4)
                 });
-            return new ResponseModel(StatusModel.Success, "ok",result);
+            return new ResponseModel(StatusModel.Success, "ok", result);
         }
         catch (Exception e)
         {
@@ -299,17 +306,21 @@ public class TaskMysqlService : ITaskSqlService
 
     public ResponseModel UpdateTask(int tid, string name, string description, string status, DateTime? endTime)
     {
-        const string sql = "UPDATE TaskInfo SET name = @name, description = @description, status = @status, end_at = @end_at WHERE taskId = @tid";
-        using var sqlCommand = _r.GetConnection().CreateCommand();
-        sqlCommand.CommandText = sql;
-        sqlCommand.Parameters.AddWithValue("@tid", tid);
-        sqlCommand.Parameters.AddWithValue("@name", name);
-        sqlCommand.Parameters.AddWithValue("@description", description);
-        sqlCommand.Parameters.AddWithValue("@status", status);
-        sqlCommand.Parameters.AddWithValue("@end_at", endTime);
         try
         {
-            return sqlCommand.ExecuteNonQuery() == 1
+            var r = _r.ExecuteNonQueryWithParameters(
+                "UPDATE TaskInfo SET name = @name, description = @description, status = @status, end_at = @end_at WHERE taskId = @tid",
+                new Dictionary<string, object?>
+                {
+                    { "@tid", tid },
+                    { "@name", name },
+                    { "@description", description },
+                    { "@status", status },
+                    { "@end_at", endTime }
+                }
+            );
+
+            return r == 1
                 ? new ResponseModel(StatusModel.Success, "更新任务成功")
                 : new ResponseModel(StatusModel.NonExist, "更新任务失败");
         }

@@ -1,4 +1,5 @@
-﻿using MySql.Data.MySqlClient;
+﻿using System.Data;
+using MySql.Data.MySqlClient;
 
 namespace IMS.Service.DataBase;
 
@@ -16,7 +17,7 @@ public interface IRelationalDataBase
     /// <param name="sql"></param>
     /// <param name="d"></param>
     /// <returns></returns>
-    public int ExecuteNonQueryWithParameters(string sql, Dictionary<string, object> d);
+    public int ExecuteNonQueryWithParameters(string sql, Dictionary<string, object?> d);
     
     /// <summary>
     /// 执行需要参数的单格查询语句，返回查询结果
@@ -32,5 +33,13 @@ public interface IRelationalDataBase
     /// <param name="sql"></param>
     /// <param name="d"></param>
     /// <returns></returns>
-    public object? ExecuteProducerWithParameters(string sql, Dictionary<string, object> d);
+    public object? ExecuteProducerWithParameters(string sql, Dictionary<string, object?> d);
+
+    /// <summary>
+    /// 执行需要参数的select语句
+    /// </summary>
+    /// <param name="sql"></param>
+    /// <param name="d"></param>
+    /// <returns></returns>
+    public IDataReader ExecuteReaderWithParameters(string sql, Dictionary<string, object?> d);
 }

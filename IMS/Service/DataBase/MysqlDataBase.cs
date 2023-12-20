@@ -62,7 +62,7 @@ public class MysqlDataBase : IRelationalDataBase
         return command.ExecuteScalar();
     }
     
-    public object? ExecuteProducerWithParameters(string sql, Dictionary<string, object> d)
+    public object? ExecuteProducerWithParameters(string sql, Dictionary<string, object?> d)
     {
         using var command = GetConnection().CreateCommand();
         command.CommandText = sql;
@@ -72,7 +72,18 @@ public class MysqlDataBase : IRelationalDataBase
             command.Parameters.AddWithValue(para.Key, para.Value).Direction = ParameterDirection.Input;
         }
         // 要求所有的存储过程必须实现一个输出的msg
-        command.Parameters.Add("@msg", MySqlDbType.Int32).Direction = ParameterDirection.Output;
+        command.Parameters.Add("@msg", MySqlDbType.Text).Direction = ParameterDirection.Output;
         return command.ExecuteScalar();
+    }
+    
+    public IDataReader ExecuteReaderWithParameters(string sql, Dictionary<string, object?> d)
+    {
+        using var command = GetConnection().CreateCommand();
+        command.CommandText = sql;
+        foreach (var para in d)
+        {
+            command.Parameters.AddWithValue(para.Key, para.Value);
+        }
+        return command.ExecuteReader();
     }
 }

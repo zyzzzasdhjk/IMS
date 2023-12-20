@@ -1,5 +1,4 @@
-﻿using IMS_API;
-using IMS.Models;
+﻿using IMS.Models;
 using IMS.Models.User;
 using IMS.Service.FileService;
 using IMS.Service.UserServices;
@@ -16,11 +15,11 @@ public class UserController : Controller
         _u = u;
     }
 
-    public JsonResult Test()
-    {
-        return Json("123");
-    }
-
+    /// <summary>
+    /// 用户登录
+    /// </summary>
+    /// <param name="user"></param>
+    /// <returns></returns>
     public JsonResult Login([FromBody] UserAccount user)
     {
         if (user.Username == null || user.Password == null)
@@ -31,7 +30,7 @@ public class UserController : Controller
     }
 
     /// <summary>
-    ///     注册界面
+    /// 注册用户
     /// </summary>
     /// <param name="user"></param>
     /// <returns></returns>
@@ -56,7 +55,7 @@ public class UserController : Controller
 
     // 重发验证邮件
     /// <summary>
-    ///     重发验证邮件
+    /// 重发验证邮件
     /// </summary>
     /// <param name="r"></param>
     /// <returns></returns>
@@ -67,7 +66,7 @@ public class UserController : Controller
 
     // 用户重设验证邮箱
     /// <summary>
-    ///     用户重设验证邮箱
+    /// 用户重设验证邮箱
     /// </summary>
     /// <param name="r"></param>
     /// <returns></returns>
@@ -80,7 +79,7 @@ public class UserController : Controller
     }
 
     /// <summary>
-    ///     获取用户信息
+    /// 获取用户信息
     /// </summary>
     /// <param name="r"></param>
     /// <returns></returns>
@@ -89,6 +88,12 @@ public class UserController : Controller
         return Json(_u.GetUserInfo(r.Uid));
     }
 
+    /// <summary>
+    /// 用户重设密码
+    /// </summary>
+    /// <param name="u"></param>
+    /// <param name="authorization"></param>
+    /// <returns></returns>
     public JsonResult ResetPassword([FromBody] UidRequestModel u, [FromHeader] string authorization)
     {
         if (_u.IsAuthorization(u.Uid, authorization))
@@ -98,7 +103,13 @@ public class UserController : Controller
 
         return Json(new AuthorizationReturnModel());
     }
-
+    
+    /// <summary>
+    /// 用户重设密码认证
+    /// </summary>
+    /// <param name="u"></param>
+    /// <param name="authorization"></param>
+    /// <returns></returns>
     public JsonResult ResetPasswordConfirm([FromBody] ResetPasswordConfirmRequestModel u,
         [FromHeader] string authorization)
     {
@@ -125,7 +136,7 @@ public class UserController : Controller
     }
 
     /// <summary>
-    ///     获取OOS的校验码
+    /// 获取OOS的校验码
     /// </summary>
     /// <returns></returns>
     public JsonResult Cos([FromBody] UidRequestModel u, [FromHeader] string authorization)

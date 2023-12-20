@@ -59,22 +59,33 @@ public interface ITaskSqlService
     /// <returns></returns>
     public ResponseModel CreateSubTask(int tid,  int uid, string title, string content,DateTime? endTime);
 
-    public ResponseModel GetTeamTasks(int tid);
-
-    public ResponseModel GetTaskSubtasks(int tid);
-    
-    public ResponseModel UpdateTask(int tid,string name,string description,string status,DateTime? endTime);
-    
     /// <summary>
-    ///     删除掉任务中的一个用户
+    /// 获取团队下的全部任务
     /// </summary>
     /// <param name="tid"></param>
-    /// <param name="uid"></param>
     /// <returns></returns>
-    public ResponseModel DeleteATaskMember(int tid, int uid);
+    public ResponseModel GetTeamTasks(int tid);
 
     /// <summary>
-    ///     提交任务的结果
+    /// 获取任务的全部子任务
+    /// </summary>
+    /// <param name="tid"></param>
+    /// <returns></returns>
+    public ResponseModel GetTaskSubtasks(int tid);
+    
+    /// <summary>
+    /// 更新任务信息
+    /// </summary>
+    /// <param name="tid"></param>
+    /// <param name="name"></param>
+    /// <param name="description"></param>
+    /// <param name="status"></param>
+    /// <param name="endTime"></param>
+    /// <returns></returns>
+    public ResponseModel UpdateTask(int tid,string name,string description,string status,DateTime? endTime);
+
+    /// <summary>
+    /// 提交任务的结果
     /// </summary>
     /// <param name="tid">任务id</param>
     /// <param name="uid">用户id</param>
@@ -82,7 +93,7 @@ public interface ITaskSqlService
     public ResponseModel SubmitResult(int tid, int uid);
 
     /// <summary>
-    ///     上传任务中所需的文件
+    /// 上传任务中所需的文件
     /// </summary>
     /// <param name="tid"></param>
     /// <param name="uid"></param>

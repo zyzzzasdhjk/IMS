@@ -2,7 +2,6 @@
 using COSXML;
 using COSXML.Auth;
 using COSXML.Model.Tag;
-using IMS_API;
 using Newtonsoft.Json.Linq;
 
 namespace IMS.Service.FileService;

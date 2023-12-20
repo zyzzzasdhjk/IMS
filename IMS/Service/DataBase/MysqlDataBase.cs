@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using IMS_API;
 using MySql.Data.MySqlClient;
 
 namespace IMS.Service.DataBase;
@@ -40,7 +39,7 @@ public class MysqlDataBase : IRelationalDataBase
     }
 
     
-    public int ExecuteNonQueryWithParameters(string sql, Dictionary<string, object> d)
+    public int ExecuteNonQueryWithParameters(string sql, Dictionary<string, object?> d)
     {
         using var command = GetConnection().CreateCommand();
         command.CommandText = sql;
@@ -51,7 +50,7 @@ public class MysqlDataBase : IRelationalDataBase
         return command.ExecuteNonQuery();
     }
 
-    public object? ExecuteScalarWithParameters(string sql, Dictionary<string, object> d)
+    public object? ExecuteScalarWithParameters(string sql, Dictionary<string, object?> d)
     {
         using var command = GetConnection().CreateCommand();
         command.CommandText = sql;
@@ -76,7 +75,7 @@ public class MysqlDataBase : IRelationalDataBase
         return command.ExecuteScalar();
     }
     
-    public IDataReader ExecuteReaderWithParameters(string sql, Dictionary<string, object?> d)
+    public MySqlDataReader ExecuteReaderWithParameters(string sql, Dictionary<string, object?> d)
     {
         using var command = GetConnection().CreateCommand();
         command.CommandText = sql;

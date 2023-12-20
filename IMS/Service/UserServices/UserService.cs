@@ -1,8 +1,6 @@
-﻿using System.Text.RegularExpressions;
-using IMS.Models;
+﻿using IMS.Models;
 using IMS.Service.DataBase;
 using MySql.Data.MySqlClient;
-using Newtonsoft.Json.Linq;
 
 namespace IMS.Service.UserServices;
 
@@ -23,6 +21,12 @@ public class UserService : IUserService
         _m = d2;
     }
 
+    /// <summary>
+    ///     获取用户的认证信息
+    /// </summary>
+    /// <param name="uid"></param>
+    /// <param name="code"></param>
+    /// <returns></returns>
     public bool IsAuthorization(int uid, string code)
     {
         if (code == "AuthorizationTest") return true; // 测试用，上线时要删除
@@ -59,57 +63,56 @@ public class UserService : IUserService
         var uid = -1; // 插入数据后用户的id
 
         /*查询是否存在相同的账号或者是邮箱，允许邮箱重复*/
-        const string sql = "select username,email,status,uid from web.User " +
-                           "where username = @username";
-        using (var sqlCommand = new MySqlCommand(sql, _d.GetConnection()))
-        {
-            sqlCommand.Parameters.AddWithValue("@username", username);
-            using var result = sqlCommand.ExecuteReader();
-            if (result.HasRows) // 当存在数据的时候，说明有邮箱或者是用户名重复了
+        using var result = _d.ExecuteReaderWithParameters(
+            "select username,email,status,uid from web.User " +
+            "where username = @username",
+            new Dictionary<string, object?>
             {
-                result.Read();
-                var resultUsername = result.GetValue(0).ToString();
-                var status = result.GetValue(2).ToString();
-                if (status == "UnConfirmed")
-                {
-                    uid = int.Parse(result.GetValue(3).ToString() ?? "-1");
-                }
-                else if (resultUsername == username)
-                {
-                    result.Close();
-                    return new ResponseModel(
-                        StatusModel.Repeat, "用户名重复");
-                }
+                { "@username", username }
             }
-            else
+        );
+        if (result.HasRows) // 当存在数据的时候，说明有邮箱或者是用户名重复了
+        {
+            result.Read();
+            var resultUsername = result.GetValue(0).ToString();
+            var status = result.GetValue(2).ToString();
+            if (status == "UnConfirmed")
+            {
+                uid = int.Parse(result.GetValue(3).ToString() ?? "-1");
+            }
+            else if (resultUsername == username)
             {
                 result.Close();
-                /*开始向数据库插入用户的信息*/
-                const string sql1 = "insert into web.User(username, password, status, email) " +
-                                    "value (@username,@password,'UnConfirmed',@email)";
-                using (var sqlCommand1 = new MySqlCommand(sql1, _d.GetConnection()))
-                {
-                    sqlCommand1.Parameters.AddWithValue("@username", username);
-                    sqlCommand1.Parameters.AddWithValue("@password", password);
-                    sqlCommand1.Parameters.AddWithValue("@email", email);
-                    sqlCommand1.ExecuteNonQuery();
-                    uid = Convert.ToInt32(sqlCommand1.LastInsertedId);
-                }
+                return new ResponseModel(
+                    StatusModel.Repeat, "用户名重复");
             }
-
+        }
+        else
+        {
             result.Close();
+            /*开始向数据库插入用户的信息*/
+            const string sql1 = "insert into web.User(username, password, status, email) " +
+                                "value (@username,@password,'UnConfirmed',@email)";
+            using var sqlCommand1 = _d.GetConnection().CreateCommand();
+            sqlCommand1.CommandText = sql1;
+            sqlCommand1.Parameters.AddWithValue("@username", username);
+            sqlCommand1.Parameters.AddWithValue("@password", password);
+            sqlCommand1.Parameters.AddWithValue("@email", email);
+            sqlCommand1.ExecuteNonQuery();
+            uid = Convert.ToInt32(sqlCommand1.LastInsertedId);
         }
 
+        result.Close();
 
         // 如果上面的验证都通过了,生成一个随机的校验码
         var r = new Random();
+
         var checkCode = r.Next(100000000, 999999999); // 生成一个随机的校验码
         if (EmailService.SendEmail(email, "激活邮件",
                 $"你的验证码为 {checkCode} ，有效时间为30分钟，请尽快激活。"))
             _m.AddUserConfirmCode(uid, checkCode);
         else
             return new ResponseModel(StatusModel.ParameterInvalid, "邮件格式非法");
-
         return new ResponseModel(StatusModel.Success, "ok", uid);
     }
 
@@ -118,11 +121,13 @@ public class UserService : IUserService
         try
         {
             // 判断用户的状态是不是未验证
-            const string sql = "select email from web.User where uid = @uid and status = 'UnConfirmed'";
-            using var sqlCommand = new MySqlCommand(sql, _d.GetConnection());
-            sqlCommand.Parameters.AddWithValue("@uid", uid);
-            var email = sqlCommand.ExecuteScalar()?.ToString();
-
+            var email = _d.ExecuteScalarWithParameters(
+                "select status from web.User where uid = @uid",
+                new Dictionary<string, object?>
+                {
+                    { "@uid", uid }
+                }
+            )?.ToString();
             if (email is null) return new ResponseModel(StatusModel.NonExist, "用户不存在或者是用户账号已经验证成功");
 
             // 如果上面的验证都通过了,生成一个随机的校验码
@@ -146,11 +151,14 @@ public class UserService : IUserService
     {
         try
         {
-            const string sql = "update web.User set email = @email where username = @username";
-            using var sqlCommand = new MySqlCommand(sql, _d.GetConnection());
-            sqlCommand.Parameters.AddWithValue("@email", email);
-            sqlCommand.Parameters.AddWithValue("@username", username);
-            var row = sqlCommand.ExecuteNonQuery();
+            var row = _d.ExecuteNonQueryWithParameters(
+                "update web.User set email = @email where username = @username",
+                new Dictionary<string, object?>
+                {
+                    { "@email", email },
+                    { "@username", username }
+                }
+            );
             return row == 1
                 ? new ResponseModel(StatusModel.Success, "ok")
                 : new ResponseModel(StatusModel.NonExist, "用户不存在");
@@ -170,27 +178,36 @@ public class UserService : IUserService
     public ResponseModel ConfirmUser(int uid, int checkCode)
     {
         /*实现校验用户是否是未验证状态*/
-        const string sql1 = "select status from web.User where uid = @uid";
-        using (var sqlCommand = new MySqlCommand(sql1, _d.GetConnection()))
+        var result = _d.ExecuteScalarWithParameters(
+            "select status from web.User where uid = @uid",
+            new Dictionary<string, object?>
+            {
+                { "@uid", uid }
+            }
+        );
+        if (result != null)
         {
-            sqlCommand.Parameters.AddWithValue("@uid", uid);
-            var result = sqlCommand.ExecuteScalar();
-            if (result != null)
-                if (Convert.ToString(result) != "UnConfirmed")
-                    return new ResponseModel(StatusModel.Repeat, "用户已经验证过了");
+            if (Convert.ToString(result) != "UnConfirmed")
+                return new ResponseModel(StatusModel.Repeat, "用户已经验证过了");
+        }
+        else
+        {
+            return new ResponseModel(StatusModel.NonExist, "用户不存在");
         }
 
         if (_m.ValidateUserConfirmCode(uid, checkCode))
         {
             // 验证成功，此时修改用户数据库内的用户状态
-            const string sql2 = "update web.User set status = 'Normal' where uid = @uid";
-            using (var sqlCommand2 = new MySqlCommand(sql2, _d.GetConnection()))
-            {
-                sqlCommand2.Parameters.AddWithValue("@uid", uid);
-                sqlCommand2.ExecuteNonQuery();
-            }
-
-            return new ResponseModel(StatusModel.Success);
+            var r = _d.ExecuteNonQueryWithParameters(
+                "update web.User set status = 'Normal' where uid = @uid",
+                new Dictionary<string, object?>
+                {
+                    { "@uid", uid }
+                }
+            );
+            return r == 1
+                ? new ResponseModel(StatusModel.Success)
+                : new ResponseModel(StatusModel.Unknown, "后端接口异常");
         }
 
         return new ResponseModel(StatusModel.CheckCodeError, "验证码错误");
@@ -199,51 +216,52 @@ public class UserService : IUserService
     public ResponseModel LoginUser(string username, string password)
     {
         /*根据账号进行查询*/
-        const string sql = "select uid,password,status,email from web.User where username = @username";
-        using (var sqlCommand = new MySqlCommand(sql, _d.GetConnection()))
+        var result = _d.ExecuteReaderWithParameters(
+            "select uid,password,status,email from web.User where username = @username",
+            new Dictionary<string, object?>
+            {
+                { "@username", username }
+            }
+        );
+        if (!result.HasRows)
         {
-            sqlCommand.Parameters.AddWithValue("@username", username);
-            var result = sqlCommand.ExecuteReader();
-            if (!result.HasRows)
-            {
-                result.Close();
-                // 如果查询结果位null，说明不存在这个用户
-                return new ResponseModel(StatusModel.NonExist, "不存在该用户");
-            }
-
-            result.Read();
-            var uid = Convert.ToInt32(result.GetValue(0)); // 用户ID
-            var userPassword = result.GetValue(1).ToString(); // 用户密码
-            var userStatus = result.GetValue(2).ToString(); // 用户状态
-            var userEmail = result.GetValue(3).ToString(); // 用户邮箱
-            result.Close(); // 及时关闭，防止出现未关闭错误
-
-            switch (userStatus)
-            {
-                case "Banned":
-                    return new ResponseModel(StatusModel.Banned, "账号已经被封禁");
-                case "UnConfirmed":
-                    return new ResponseModel(StatusModel.Unconfirmed, "用户账号未验证",
-                        new
-                        {
-                            Uid = uid,
-                            Email = userEmail
-                        });
-            }
-
-            if (userPassword == null) //密码为空，什么数据库错误或者是账号数据错误
-                return new ResponseModel(StatusModel.Unknown, "用户数据异常");
-
-            if (!PasswordHasher.CheckPassword(password, userPassword))
-                return new ResponseModel(StatusModel.ParameterError, "账号或者密码错误");
-
-            /*生成用户认证码，用于后面的认证*/
-            var authenticationCode = INosqlDataBase.GenerateUserAuthenticationCode(uid, password);
-            _m.AddUserAuthenticationCode(uid, authenticationCode);
-            return new ResponseModel(StatusModel.Success, "登录成功",
-                new { Uid = uid, AuthenticationCode = authenticationCode }
-            );
+            result.Close();
+            // 如果查询结果位null，说明不存在这个用户
+            return new ResponseModel(StatusModel.NonExist, "不存在该用户");
         }
+
+        result.Read();
+        var uid = Convert.ToInt32(result.GetValue(0)); // 用户ID
+        var userPassword = result.GetValue(1).ToString(); // 用户密码
+        var userStatus = result.GetValue(2).ToString(); // 用户状态
+        var userEmail = result.GetValue(3).ToString(); // 用户邮箱
+        result.Close(); // 及时关闭，防止出现未关闭错误
+
+        switch (userStatus)
+        {
+            case "Banned":
+                return new ResponseModel(StatusModel.Banned, "账号已经被封禁");
+            case "UnConfirmed":
+                return new ResponseModel(StatusModel.Unconfirmed, "用户账号未验证",
+                    new
+                    {
+                        Uid = uid,
+                        Email = userEmail
+                    });
+        }
+
+        if (userPassword == null) //密码为空，什么数据库错误或者是账号数据错误
+            return new ResponseModel(StatusModel.Unknown, "用户数据异常");
+
+        if (!PasswordHasher.CheckPassword(password, userPassword))
+            return new ResponseModel(StatusModel.ParameterError, "账号或者密码错误");
+
+        /*生成用户认证码，用于后面的认证*/
+        var authenticationCode = INosqlDataBase.GenerateUserAuthenticationCode(uid, password);
+        _m.AddUserAuthenticationCode(uid, authenticationCode);
+        return new ResponseModel(StatusModel.Success, "登录成功",
+            new { Uid = uid, AuthenticationCode = authenticationCode }
+        );
     }
 
 
@@ -256,10 +274,13 @@ public class UserService : IUserService
     {
         try
         {
-            const string sql = "select email from web.User where uid = @uid and status = 'Normal'";
-            using var sqlCommand = new MySqlCommand(sql, _d.GetConnection());
-            sqlCommand.Parameters.AddWithValue("@uid", uid);
-            var result = sqlCommand.ExecuteScalar();
+            var result = _d.ExecuteScalarWithParameters(
+                    "select email from web.User where uid = @uid and status = 'Normal'",
+                    new Dictionary<string, object?>
+                    {
+                        { "@uid", uid }
+                    }
+            );
             if (result is DBNull || result is null) return new ResponseModel(StatusModel.NonExist, "用户不存在");
             var email = result.ToString() ?? "";
 
@@ -294,13 +315,15 @@ public class UserService : IUserService
             // 修改密码需要向邮箱发送验证邮件
             if (!_m.ValidateUserConfirmCode(uid, Convert.ToInt32(checkCode))) // 验证验证码
                 return new ResponseModel(StatusModel.CheckCodeError, "验证码错误");
-            const string sql = "update web.user set password = @password where uid = @uid";
-            using var sqlCommand = new MySqlCommand(sql, _d.GetConnection());
-            sqlCommand.Parameters.AddWithValue("@uid", uid);
-            sqlCommand.Parameters.AddWithValue("@password", PasswordHasher.HashPassword(newPwd));
-            var changeRow = sqlCommand.ExecuteNonQuery();
+            var changeRow = _d.ExecuteNonQueryWithParameters(
+                "update web.user set password = @password where uid = @uid",
+                new Dictionary<string, object?>
+                {
+                    { "@uid", uid },
+                    { "@password", PasswordHasher.HashPassword(newPwd) }
+                }
+            );
             if (changeRow == 1) return new ResponseModel(StatusModel.Success, "修改密码成功");
-
             return new ResponseModel(StatusModel.NonExist, "该用户信息异常");
         }
         catch (Exception e)
@@ -312,12 +335,15 @@ public class UserService : IUserService
 
     public ResponseModel GetUserInfo(int uid)
     {
-        const string sql = "select name, gender, birthday, description," +
-                           "(select created_at from web.user where uid = @uid) " +
-                           "from web.userInfo where uid = @uid";
-        using var sqlCommand = new MySqlCommand(sql, _d.GetConnection());
-        sqlCommand.Parameters.AddWithValue("@uid", uid);
-        var result = sqlCommand.ExecuteReader();
+        var result = _d.ExecuteReaderWithParameters(
+            "select name, gender, birthday, description," +
+            "(select created_at from web.user where uid = @uid) " +
+            "from web.userInfo where uid = @uid",
+            new Dictionary<string, object?>
+            {
+                { "@uid", uid }
+            }
+        );
         if (!result.HasRows)
         {
             result.Close();
@@ -349,23 +375,12 @@ public class UserService : IUserService
             });
     }
 
-    public bool DeleteUser(string username, string password)
-    {
-        return true;
-    }
-
-    /// <summary>
-    ///     判断密码是否符合规则
-    ///     该规则为
-    /// </summary>
-    /// <param name="password"></param>
-    /// <returns></returns>
-    private static bool IsPasswordValid(string password)
+    /*private static bool IsPasswordValid(string password)
     {
         return Regex.IsMatch(password, @"^(?![a-zA-Z]+$)(?!\d+$)(?![^\da-zA-Z\s]+$).{8,}$");
-    }
+    }*/
 
-    public ResponseModel UpdateUser(JObject user)
+    /*public ResponseModel UpdateUser(JObject user)
     {
         var sql = "UPDATE USERINFO SET " +
                   "name = @name,description = @description," +
@@ -381,9 +396,9 @@ public class UserService : IUserService
             if (num == 1) return new ResponseModel(StatusModel.Success, "ok");
             return new ResponseModel(StatusModel.Unknown, "错误!");
         }
-    }
+    }*/
 
-    public ResponseModel ResetUserEmail(string username, string email)
+    /*public ResponseModel ResetUserEmail(string username, string email)
     {
         var sql = "update web.user set email = @email where username = @username";
         using (var sqlCommand = new MySqlCommand(sql, _d.GetConnection()))
@@ -395,26 +410,28 @@ public class UserService : IUserService
                 return new ResponseModel(StatusModel.Success, "ok");
             return new ResponseModel(StatusModel.Unknown, "后端错误");
         }
-    }
+    }*/
 
     public ResponseModel UpdateUserInfo(int uid, string name, string description, string gender, DateTime birthday)
     {
         try
         {
-            string sql = "UPDATE web.UserInfo SET web.UserInfo.name = @name," +
-                         "web.UserInfo.description = @description," +
-                         "web.UserInfo.gender = @gender," +
-                         "web.UserInfo.birthday = @birthday " +
-                         "WHERE web.UserInfo.uid = @uid";
-            using var sqlCommand = new MySqlCommand(sql, _d.GetConnection());
-
-            sqlCommand.Parameters.AddWithValue("@name", name);
-            sqlCommand.Parameters.AddWithValue("@description", description);
-            sqlCommand.Parameters.AddWithValue("@gender", gender);
-            sqlCommand.Parameters.AddWithValue("@birthday", birthday);
-            sqlCommand.Parameters.AddWithValue("@uid", uid);
-            var changeRow = sqlCommand.ExecuteNonQuery();
-            if (changeRow == 1)
+            var r = _d.ExecuteNonQueryWithParameters(
+                "UPDATE web.UserInfo SET web.UserInfo.name = @name," +
+                "web.UserInfo.description = @description," +
+                "web.UserInfo.gender = @gender," +
+                "web.UserInfo.birthday = @birthday " +
+                "WHERE web.UserInfo.uid = @uid",
+                new Dictionary<string, object?>
+                {
+                    {"@name", name},
+                    {"@description", description},
+                    {"@gender", gender},
+                    {"@birthday", birthday},
+                    {"@uid", uid}
+                }
+            );
+            if (r == 1)
                 return new ResponseModel(StatusModel.Success, "ok");
             return new ResponseModel(StatusModel.Unknown, "后端错误");
         }

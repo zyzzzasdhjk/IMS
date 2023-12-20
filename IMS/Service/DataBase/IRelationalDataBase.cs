@@ -1,5 +1,4 @@
-﻿using System.Data;
-using MySql.Data.MySqlClient;
+﻿using MySql.Data.MySqlClient;
 
 namespace IMS.Service.DataBase;
 
@@ -25,7 +24,7 @@ public interface IRelationalDataBase
     /// <param name="sql"></param>
     /// <param name="d"></param>
     /// <returns></returns>
-    public object? ExecuteScalarWithParameters(string sql, Dictionary<string, object> d);
+    public object? ExecuteScalarWithParameters(string sql, Dictionary<string, object?> d);
 
     /// <summary>
     /// 执行需要参数的存储过程，返回存储过程的信息
@@ -41,5 +40,5 @@ public interface IRelationalDataBase
     /// <param name="sql"></param>
     /// <param name="d"></param>
     /// <returns></returns>
-    public IDataReader ExecuteReaderWithParameters(string sql, Dictionary<string, object?> d);
+    public MySqlDataReader ExecuteReaderWithParameters(string sql, Dictionary<string, object?> d);
 }

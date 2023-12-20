@@ -1,5 +1,4 @@
-﻿using IMS_API;
-using IMS.Models;
+﻿using IMS.Models;
 using IMS.Models.Task;
 using IMS.Service.TaskService;
 using IMS.Service.UserServices;
@@ -17,23 +16,7 @@ public class TaskController : Controller
         _t = t;
         _u = u;
     }
-
-    /// <summary>
-    /// 检查参数是否符合要求
-    /// </summary>
-    /// <param name="t"></param>
-    /// <param name="paras"></param>
-    /// <returns></returns>
-    private bool ParametricTest(TaskRequestModel t, List<string> paras)
-    {
-        foreach (var p in paras)
-        {
-            if (t.GetType().GetProperty(p) == null) return false;
-        }
-        return true;
-    }
     
-
     public JsonResult Index([FromBody] SubmitTaskFile s)
     {
         return Json("get");
@@ -225,7 +208,8 @@ public class TaskController : Controller
         try
         {
             if (!Common.NeedAuth || _u.IsAuthorization(t.Uid, authorization))
-                return Json(_t.UpdateTask(t.Tid, t.Title, t.Description,t.Status, t.EndTime));
+                return Json(_t.UpdateTask(t.Tid, t.Title ?? "", 
+                    t.Description ?? "",t.Status ?? "", t.EndTime));
             return Json(new ResponseModel(StatusModel.AuthorizationError, "禁止未知用户执行次操作"));
         }
         catch (Exception e)

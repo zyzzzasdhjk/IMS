@@ -15,7 +15,7 @@ public interface ITeamSqlService
     public UserCreateTeamResponseStatus UserCreateTeam(int uid, string name, string description, string joinCode);
 
     /// <summary>
-    ///     用户的身份信息的修改
+    /// 用户的身份信息的修改
     /// </summary>
     /// <param name="commandUid">命令发出者id</param>
     /// <param name="uid">被指定的用户id</param>
@@ -25,7 +25,7 @@ public interface ITeamSqlService
     public UserAppointResponseStatus UserAppoint(int commandUid, int uid, int tid, string role);
 
     /// <summary>
-    ///     根据加入码加入团队
+    /// 根据加入码加入团队
     /// </summary>
     /// <param name="uid"></param>
     /// <param name="joinCode"></param>
@@ -33,7 +33,7 @@ public interface ITeamSqlService
     public ResponseModel JoinTeam(int uid, string joinCode);
 
     /// <summary>
-    ///     根据tid加入团队
+    /// 根据tid加入团队
     /// </summary>
     /// <param name="uid"></param>
     /// <param name="tid"></param>
@@ -41,7 +41,7 @@ public interface ITeamSqlService
     public ResponseModel JoinTeam(int uid, int tid);
 
     /// <summary>
-    ///     用户退出团队
+    /// 用户退出团队
     /// </summary>
     /// <param name="uid">用户id</param>
     /// <param name="tid">团队id</param>
@@ -49,7 +49,7 @@ public interface ITeamSqlService
     public ResponseModel ExitTeam(int uid, int tid);
 
     /// <summary>
-    ///     获取团队信息
+    /// 获取团队信息
     /// </summary>
     /// <param name="tid"></param>
     /// <returns></returns>
@@ -58,24 +58,43 @@ public interface ITeamSqlService
     // public ReturnMessageModel UpdateTeam(TeamInfoModel t);
 
     /// <summary>
-    ///     获取用户的全部团队
+    /// 获取用户的全部团队
     /// </summary>
     /// <param name="uid"></param>
     /// <returns></returns>
     public ResponseModel GetUserTeams(int uid);
 
     /// <summary>
-    ///     团队创建者删除掉团队
+    /// 团队创建者删除掉团队
     /// </summary>
     /// <param name="uid"></param>
     /// <param name="tid"></param>
     public ResponseModel DeleteTeam(int uid, int tid);
 
     /// <summary>
-    ///     查询该团队的全部成员
+    /// 查询该团队的全部成员
     /// </summary>
     /// <param name="uid"></param>
     /// <param name="tid"></param>
     /// <returns></returns>
     public ResponseModel GetTeamMembers(int uid, int tid);
+
+    /// <summary>
+    /// 上传文件
+    /// </summary>
+    /// <param name="tid"></param>
+    /// <returns></returns>
+    public ResponseModel GetUploadRight(int tid);
+
+    /// <summary>
+    /// 告知上传成功，把数据加入到数据库中
+    /// </summary>
+    /// <param name="uid"></param>
+    /// <param name="tid"></param>
+    /// <param name="filename"></param>
+    /// <param name="filepath"></param>
+    /// <returns></returns>
+    public ResponseModel UploadSuccess(int uid, int tid, string filename, string filepath);
+    
+    public ResponseModel GetDownloadRight(int tid);
 }

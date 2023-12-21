@@ -1,19 +1,20 @@
 ﻿using IMS.Models;
 using IMS.Models.Team;
 using IMS.Service.DataBase;
+using IMS.Service.FileService;
 using MySql.Data.MySqlClient;
 
 namespace IMS.Service.TeamServices;
 
 public class TeamMysqlService : ITeamSqlService
 {
-    private readonly IRelationalDataBase _m;
+    private readonly IRelationalDataBase _r;
     private readonly Dictionary<string, int> _userRoles = new();
     /*public readonly string[] TeamInfoColumns = { "name", "description", "joinCode", "peopleMaxNum" };*/
 
-    public TeamMysqlService(IRelationalDataBase m)
+    public TeamMysqlService(IRelationalDataBase r)
     {
-        _m = m;
+        _r = r;
         // 用户身份权限初始化
         _userRoles.Add("Creator", 3);
         _userRoles.Add("Admin", 2);
@@ -43,7 +44,7 @@ public class TeamMysqlService : ITeamSqlService
             // 执行存储过程
             sqlCommand.ExecuteNonQuery();*/
             // 从参数的Value属性中获取返回值
-            var returnCode = _m.ExecuteProducerWithParameters(
+            var returnCode = _r.ExecuteProducerWithParameters(
                 "UserCreateTeam",
                 new Dictionary<string, object?>
                 {
@@ -64,7 +65,7 @@ public class TeamMysqlService : ITeamSqlService
         try
         {
             // 先判断这个加入码的团队是否存在
-            var result = _m.ExecuteScalarWithParameters(
+            var result = _r.ExecuteScalarWithParameters(
                 "select tid from web.TeamInfo  where joinCode = @joinCode",
                 new Dictionary<string, object?>
                 {
@@ -77,7 +78,7 @@ public class TeamMysqlService : ITeamSqlService
             
             
             // 更新数据库中用户的信息
-            var row = _m.ExecuteNonQueryWithParameters(
+            var row = _r.ExecuteNonQueryWithParameters(
                 "insert into web.TeamMember(tid, uid, role) value (@tid, @uid, 'Member')", 
                 new Dictionary<string, object?>
                 {
@@ -99,7 +100,7 @@ public class TeamMysqlService : ITeamSqlService
         try
         {
             // 判断对应的团队是否存在
-            var result = _m.ExecuteScalarWithParameters(
+            var result = _r.ExecuteScalarWithParameters(
                 "select tid from web.TeamInfo where tid = @tid",
                 new Dictionary<string, object?>
                 {
@@ -109,7 +110,7 @@ public class TeamMysqlService : ITeamSqlService
             if (result is null) return new ResponseModel(StatusModel.NonExist, "团队不存在");
 
             // 更新数据库中用户的信息
-            var i = _m.ExecuteNonQueryWithParameters(
+            var i = _r.ExecuteNonQueryWithParameters(
                 "insert into web.TeamMember(tid, uid, role) value (@tid, @uid, 'Member')",
                 new Dictionary<string, object?>
                 {
@@ -133,7 +134,7 @@ public class TeamMysqlService : ITeamSqlService
         
         // 判断命令的发出者权限是否足够
         string? commandRole, commandedRole; // 
-        commandRole = _m.ExecuteScalarWithParameters(
+        commandRole = _r.ExecuteScalarWithParameters(
             "select role from web.TeamMember where tid = @tid and uid = @uid",
             new Dictionary<string, object?>
             {
@@ -144,7 +145,7 @@ public class TeamMysqlService : ITeamSqlService
 
 
         // 判断用户是否存在
-        commandedRole = _m.ExecuteScalarWithParameters(
+        commandedRole = _r.ExecuteScalarWithParameters(
             "select role from web.TeamMember where tid = @tid and uid = @uid",
             new Dictionary<string, object?>
             {
@@ -170,7 +171,7 @@ public class TeamMysqlService : ITeamSqlService
             var result = sqlCommand.ExecuteScalar();
             if (result == null) return UserAppointResponseStatus.UserNonExist;
         }*/
-        var r = _m.ExecuteNonQueryWithParameters(
+        var r = _r.ExecuteNonQueryWithParameters(
             "update web.TeamMember set role = @role where tid = @tid and uid = @uid",
             new Dictionary<string, object?>
             {
@@ -200,7 +201,7 @@ public class TeamMysqlService : ITeamSqlService
             /*sqlCommand.ExecuteNonQuery();
             // 从参数的Value属性中获取返回值
             var returnCode = (int)sqlCommand.Parameters["@msg"].Value;*/
-            var r = _m.ExecuteProducerWithParameters(
+            var r = _r.ExecuteProducerWithParameters(
                 "UserDeleteTeam",
                 new Dictionary<string, object?>
                 {
@@ -222,7 +223,7 @@ public class TeamMysqlService : ITeamSqlService
     {
         try
         {
-            var r = _m.ExecuteNonQueryWithParameters(
+            var r = _r.ExecuteNonQueryWithParameters(
                 "update web.TeamMember set role = 'Deleted' where tid = @tid and uid = @uid",
                 new Dictionary<string, object?>
                 {
@@ -249,7 +250,7 @@ public class TeamMysqlService : ITeamSqlService
     {
         try
         {
-            using var result = _m.ExecuteReaderWithParameters(
+            using var result = _r.ExecuteReaderWithParameters(
                 "select name,description,created_at,(select count(*) from web.TeamMember " +
                 "where tid = @tid and role != 'Deleted' ) from web.TeamInfo " +
                 "where tid = @tid",
@@ -282,7 +283,7 @@ public class TeamMysqlService : ITeamSqlService
     {
         try
         {
-            var result = _m.ExecuteReaderWithParameters(
+            var result = _r.ExecuteReaderWithParameters(
                 "select tid,name,description,PeopleNumber from web.UserTeamsView where uid = @uid",
                 new Dictionary<string, object?>
                 {
@@ -315,7 +316,7 @@ public class TeamMysqlService : ITeamSqlService
     {
         try
         {
-            var result = _m.ExecuteReaderWithParameters(
+            var result = _r.ExecuteReaderWithParameters(
                 "select uid,name,role from web.TeamMemberView where tid = @tid and role != 'Deleted'",
                 new Dictionary<string, object?>
                 {
@@ -350,105 +351,57 @@ public class TeamMysqlService : ITeamSqlService
         }
     }
 
-    /*/// <summary>
-    /// 检测加入码是否已经存在
-    /// </summary>
-    /// <param name="joinCode"></param>
-    /// <returns>true为存在</returns>
-    private bool ExistJoinCode(string joinCode)
-    {
-        var connection = _m.GetConnection();
-        var checkSql = "select * from web.TeamInfo where joinCode = @joinCode";
-        using (var sqlCommand = new MySqlCommand(checkSql, connection))
-        {
-            sqlCommand.Parameters.AddWithValue("@joinCode", joinCode);
-            var result = sqlCommand.ExecuteReader();
-            if (result.HasRows) return true;
-
-            return false;
-        }
-    }*/
-
-    /*public ResponseModel CreateTeam(TeamInfoModel t)
-    {
-        var connection = _m.GetConnection();
-        if (t.Name == null) // 名字不允许为空
-            return new ResponseModel(StatusModel.ParameterInvalid, "名字不允许为空");
-
-        string joinCode;
-
-        if (t.JoinCOde != null)
-        {
-            if (!TeamFunction.CheckJoinCode(t.JoinCOde))
-                return new ResponseModel(StatusModel.ParameterInvalid, "加入码格式不正确");
-
-            if (ExistJoinCode(t.JoinCOde)) return new ResponseModel(StatusModel.ParameterInvalid, "加入码已存在");
-
-            joinCode = t.JoinCOde;
-        }
-        else
-        {
-            // 如果用户没有给定生成码，自动生成加入码
-            joinCode = TeamFunction.GenerateJoinCode();
-            while (ExistJoinCode(joinCode)) // 但生成的加入码已经存在时，重新生成
-                joinCode = TeamFunction.GenerateJoinCode();
-        }
-
-        const string sql =
-            "insert into web.TeamInfo (name, description,JoinCode) values (@name, @description,@joinCode)";
-        using (var sqlCommand = new MySqlCommand(sql, connection))
-        {
-            sqlCommand.Parameters.AddWithValue("@name", t.Name);
-            sqlCommand.Parameters.AddWithValue("@description", t.Description);
-            sqlCommand.Parameters.AddWithValue("@joinCode", joinCode);
-            var result = sqlCommand.ExecuteNonQuery();
-            return result >= 1
-                ? new ResponseModel(StatusModel.Success, "ok")
-                : new ResponseModel(StatusModel.Unknown, "修改失败");
-        }
-    }
-
-    public ResponseModel UpdateTeam(TeamInfoModel t)
-    {
-        bool nameFlag = t.Name != null, descriptionFlag = t.Description != null;
-        if (!nameFlag && !descriptionFlag) return new ResponseModel(StatusModel.ParameterInvalid, "未更新信息");
-
-        var sql = string.Format("Update web.TeamInfo set {0} {1} {2} where tid = @tid",
-            nameFlag ? "name = @name" : "", nameFlag & descriptionFlag ? "," : "",
-            descriptionFlag ? "description = @description" : "");
-        var connection = _m.GetConnection();
-        using (var sqlCommand = new MySqlCommand(sql, connection))
-        {
-            sqlCommand.Parameters.AddWithValue("@tid", t.Tid);
-            if (nameFlag) sqlCommand.Parameters.AddWithValue("@name", t.Name);
-
-            if (descriptionFlag) sqlCommand.Parameters.AddWithValue("@description", t.Description);
-
-            var result = sqlCommand.ExecuteNonQuery();
-            return result >= 1
-                ? new ResponseModel(StatusModel.Success, "ok")
-                : new ResponseModel(StatusModel.Unknown, "修改失败");
-        }
-    }
-
-    public ResponseModel UpdateTeamInfo(TeamInfoModel t)
+    public ResponseModel GetUploadRight(int tid)
     {
         try
         {
-            const string sql = "update web.TeamInfo set name = @name, description = @description where tid = @tid";
-            using var connection = _m.GetConnection();
-            using var sqlCommand = new MySqlCommand(sql, connection);
-            sqlCommand.Parameters.AddWithValue("@tid", t.Tid);
-            sqlCommand.Parameters.AddWithValue("@name", t.Name);
-            sqlCommand.Parameters.AddWithValue("@description", t.Description);
-            var result = sqlCommand.ExecuteNonQuery();
-            if (result == 1) return new ResponseModel(StatusModel.Success, "ok");
-
-            return new ResponseModel(StatusModel.Unknown);
+            // 先获取权限
+            var right = ObjectStorageService.GetUploadRight($"TeamFiles/{tid}/*");
+            return new ResponseModel(StatusModel.Success, "ok", right);
         }
         catch (Exception e)
         {
             return new ResponseModel(StatusModel.Unknown, e.Message);
         }
-    }*/
+    }
+
+    public ResponseModel UploadSuccess(int uid, int tid, string filename, string filepath)
+    {
+        try
+        {
+            var r = _r.ExecuteNonQueryWithParameters(
+                "Insert Into web.FileInfo(fileName, filePath, Uploader) " +
+                "VALUE (@fileName, @filePath, @uploader);" +
+                "INSERT INTO web.TeamFiles(tid, fileId) VALUE (@tid, LAST_INSERT_ID());",
+                new Dictionary<string, object?>
+                {
+                    { "@fileName", filename },
+                    { "@filePath", filepath },
+                    { "@uploader", uid },
+                    { "@tid", tid }
+                }
+            );
+            return r == 2
+                ? new ResponseModel(StatusModel.Success,"ok")
+                : new ResponseModel(StatusModel.Unknown, "后端接口异常");
+        }
+        catch (Exception e)
+        {
+            return new ResponseModel(StatusModel.Unknown, e.Message);
+        }
+    }
+
+    public ResponseModel GetDownloadRight(int tid)
+    {
+        try
+        {
+            // 先获取权限
+            var right = ObjectStorageService.GetDownloadRight($"TeamFiles/{tid}/*");
+            return new ResponseModel(StatusModel.Success, "ok", right);
+        }
+        catch (Exception e)
+        {
+            return new ResponseModel(StatusModel.Unknown, e.Message);
+        }
+    }
 }

@@ -33,6 +33,7 @@
 
     <ItemGroup>
         <None Include="wwwroot\js\cos-js-sdk-v5.min.js" />
+        <None Include="wwwroot\UploadFileTest.html" />
     </ItemGroup>
 
 </Project>

@@ -46,7 +46,12 @@ public class ObjectStorageService
         CosCredentialProvider = new DefaultQCloudCredentialProvider(SecretId, SecretKey, 15768000);
     }
 
-    public static object GetReadRight(string path)
+    /// <summary>
+    /// 允许下载的路径
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    public static object GetDownloadRight(string path)
     {
         var values = new Dictionary<string, object>();
         values.Add("bucket", Bucket);
@@ -73,27 +78,23 @@ public class ObjectStorageService
 
 
     /// <summary>
-    ///     获取上传的权限
+    /// 获取上传的权限
     /// </summary>
     /// <param name="path">允许存放的文件名字</param>
     /// <returns></returns>
     public static object GetUploadRight(string path)
     {
-        var
-            allowPrefix = path; // 这里改成允许的路径前缀，可以根据自己网站的用户登录态判断允许上传的具体路径，例子： a.jpg 或者 a/* 或者 * (使用通配符*存在重大安全风险, 请谨慎评估使用)
-
-
         var values = new Dictionary<string, object>();
         values.Add("bucket", Bucket);
         values.Add("region", Region);
-        values.Add("allowPrefix", allowPrefix);
+        values.Add("allowPrefix", path);
         // 也可以通过 allowPrefixes 指定路径前缀的集合
         // values.Add("allowPrefixes", new string[] {
         //     "path/to/dir1/*",
         //     "path/to/dir2/*",
         // });
         values.Add("allowActions", WritePolicy);
-        values.Add("durationSeconds", 3600);
+        values.Add("durationSeconds", 3600); // 权限时间，1小时
 
         values.Add("secretId", SecretId);
         values.Add("secretKey", SecretKey);
@@ -112,16 +113,6 @@ public class ObjectStorageService
             ExpiredTime = credential["ExpiredTime"],
             StartTime = credential["StartTime"]
         };
-
-        /*string[] allowActions = new string[] {  // 允许的操作范围，这里以上传操作为例
-            "name/cos:PutObject",
-            "name/cos:PostObject",
-            "name/cos:InitiateMultipartUpload",
-            "name/cos:ListMultipartUploads",
-            "name/cos:ListParts",
-            "name/cos:UploadPart",
-            "name/cos:CompleteMultipartUpload"
-        };*/
     }
 
     public static string GetLongLink(string path)

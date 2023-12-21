@@ -12,12 +12,12 @@ internal class CheckCode
 
 public class UserService : IUserService
 {
-    private readonly IRelationalDataBase _d;
+    private readonly IRelationalDataBase _r;
     private readonly INosqlDataBase _m; // 非关系型数据库
 
     public UserService(IRelationalDataBase d1, INosqlDataBase d2)
     {
-        _d = d1;
+        _r = d1;
         _m = d2;
     }
 
@@ -63,7 +63,7 @@ public class UserService : IUserService
         var uid = -1; // 插入数据后用户的id
 
         /*查询是否存在相同的账号或者是邮箱，允许邮箱重复*/
-        using var result = _d.ExecuteReaderWithParameters(
+        using var result = _r.ExecuteReaderWithParameters(
             "select username,email,status,uid from web.User " +
             "where username = @username",
             new Dictionary<string, object?>
@@ -93,7 +93,7 @@ public class UserService : IUserService
             /*开始向数据库插入用户的信息*/
             const string sql1 = "insert into web.User(username, password, status, email) " +
                                 "value (@username,@password,'UnConfirmed',@email)";
-            using var sqlCommand1 = _d.GetConnection().CreateCommand();
+            using var sqlCommand1 = _r.GetConnection().CreateCommand();
             sqlCommand1.CommandText = sql1;
             sqlCommand1.Parameters.AddWithValue("@username", username);
             sqlCommand1.Parameters.AddWithValue("@password", password);
@@ -121,7 +121,7 @@ public class UserService : IUserService
         try
         {
             // 判断用户的状态是不是未验证
-            var email = _d.ExecuteScalarWithParameters(
+            var email = _r.ExecuteScalarWithParameters(
                 "select status from web.User where uid = @uid",
                 new Dictionary<string, object?>
                 {
@@ -151,7 +151,7 @@ public class UserService : IUserService
     {
         try
         {
-            var row = _d.ExecuteNonQueryWithParameters(
+            var row = _r.ExecuteNonQueryWithParameters(
                 "update web.User set email = @email where username = @username",
                 new Dictionary<string, object?>
                 {
@@ -178,7 +178,7 @@ public class UserService : IUserService
     public ResponseModel ConfirmUser(int uid, int checkCode)
     {
         /*实现校验用户是否是未验证状态*/
-        var result = _d.ExecuteScalarWithParameters(
+        var result = _r.ExecuteScalarWithParameters(
             "select status from web.User where uid = @uid",
             new Dictionary<string, object?>
             {
@@ -198,7 +198,7 @@ public class UserService : IUserService
         if (_m.ValidateUserConfirmCode(uid, checkCode))
         {
             // 验证成功，此时修改用户数据库内的用户状态
-            var r = _d.ExecuteNonQueryWithParameters(
+            var r = _r.ExecuteNonQueryWithParameters(
                 "update web.User set status = 'Normal' where uid = @uid",
                 new Dictionary<string, object?>
                 {
@@ -216,7 +216,7 @@ public class UserService : IUserService
     public ResponseModel LoginUser(string username, string password)
     {
         /*根据账号进行查询*/
-        var result = _d.ExecuteReaderWithParameters(
+        var result = _r.ExecuteReaderWithParameters(
             "select uid,password,status,email from web.User where username = @username",
             new Dictionary<string, object?>
             {
@@ -274,7 +274,7 @@ public class UserService : IUserService
     {
         try
         {
-            var result = _d.ExecuteScalarWithParameters(
+            var result = _r.ExecuteScalarWithParameters(
                     "select email from web.User where uid = @uid and status = 'Normal'",
                     new Dictionary<string, object?>
                     {
@@ -315,7 +315,7 @@ public class UserService : IUserService
             // 修改密码需要向邮箱发送验证邮件
             if (!_m.ValidateUserConfirmCode(uid, Convert.ToInt32(checkCode))) // 验证验证码
                 return new ResponseModel(StatusModel.CheckCodeError, "验证码错误");
-            var changeRow = _d.ExecuteNonQueryWithParameters(
+            var changeRow = _r.ExecuteNonQueryWithParameters(
                 "update web.user set password = @password where uid = @uid",
                 new Dictionary<string, object?>
                 {
@@ -335,7 +335,7 @@ public class UserService : IUserService
 
     public ResponseModel GetUserInfo(int uid)
     {
-        var result = _d.ExecuteReaderWithParameters(
+        var result = _r.ExecuteReaderWithParameters(
             "select name, gender, birthday, description," +
             "(select created_at from web.user where uid = @uid) " +
             "from web.userInfo where uid = @uid",
@@ -416,7 +416,7 @@ public class UserService : IUserService
     {
         try
         {
-            var r = _d.ExecuteNonQueryWithParameters(
+            var r = _r.ExecuteNonQueryWithParameters(
                 "UPDATE web.UserInfo SET web.UserInfo.name = @name," +
                 "web.UserInfo.description = @description," +
                 "web.UserInfo.gender = @gender," +

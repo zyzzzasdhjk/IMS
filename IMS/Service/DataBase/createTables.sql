@@ -71,10 +71,10 @@ FROM TeamMember AS TM
          LEFT JOIN TeamInfo TI on TM.tid = TI.tid;
 
 -- 用户创建团队
-CREATE PROCEDURE UserCreateTeam(IN n varchar(20), IN d text, IN j varchar(9), IN u int, OUT msg INT)
+CREATE PROCEDURE UserCreateTeam(IN n varchar(20), IN d text, IN j varchar(9), IN u int, OUT msg TEXT)
 BEGIN
     IF EXISTS(SELECT * FROM TeamInfo WHERE JoinCode = j) THEN -- 判断是否存在相同的加入码
-        SET msg = 1; -- 代表加入码重复
+        SET msg = 'error'; -- 代表加入码重复
     ELSE
         IF j = '' THEN
             INSERT INTO TeamInfo (name, description) VALUES (n, d);
@@ -82,30 +82,30 @@ BEGIN
             INSERT INTO TeamInfo (name, description, JoinCode) VALUES (n, d, j);
         END IF;
         INSERT INTO TeamMember (tid, uid, role) VALUES (LAST_INSERT_ID(), u, 'Creator');
-        SET msg = 0;
+        SET msg = 'ok';
     END IF;
 END;
 
 -- 用户删除团队，需要鉴定权限
-CREATE PROCEDURE UserDeleteTeam(IN u int, IN t int, OUT msg INT)
+CREATE PROCEDURE UserDeleteTeam(IN u int, IN t int, OUT msg TEXT)
 BEGIN
     IF EXISTS(SELECT * FROM TeamMember WHERE uid = u AND tid = t AND role = 'Creator') THEN
         UPDATE TeamInfo SET status = 'Deleted' WHERE tid = t;
         UPDATE TeamMember SET role = 'Deleted' WHERE tid = t; -- 删除掉团队中全部用户的信息
-        SET msg = 0;
+        SET msg = 'ok';
     ELSE
-        SET msg = 1;
+        SET msg = 'error';
     END IF;
 END;
 
 -- 用户查询团队成员
-CREATE PROCEDURE UserGetTeamMembers(IN u int, IN t int, OUT msg INT)
+CREATE PROCEDURE UserGetTeamMembers(IN u int, IN t int, OUT msg TEXT)
 BEGIN
     IF EXISTS(SELECT * FROM TeamMember WHERE uid = u AND tid = t) THEN
         SELECT role FROM TeamMember WHERE uid = u AND tid = t;
-        SET msg = 0;
+        SET msg = 'ok';
     ELSE
-        SET msg = 1;
+        SET msg = 'error';
     END IF;
 END;
 
@@ -232,3 +232,43 @@ BEGIN
     UPDATE TaskMembers SET TaskMembers.role = 'Deleted' WHERE tid = OLD.tid;
 END;
 
+-- 文件表
+CREATE TABLE FileInfo(
+  fileId int AUTO_INCREMENT PRIMARY KEY ,
+  fileName varchar(50) NOT NULL,
+  filePath varchar(100) NOT NULL,
+  Uploader int NOT NULL, --  上传的人
+  foreign key (Uploader) references User (uid), 
+  created_at DATETIME default CURRENT_TIMESTAMP null,
+  updated_at DATETIME default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP
+);
+
+-- 任务文件表
+CREATE TABLE IF NOT EXISTS TaskFiles
+(
+    taskId int,
+    fileId int,
+    foreign key (taskId) references TaskInfo (taskId),
+    foreign key (fileId) references FileInfo (fileId)
+);
+
+-- 团队共享文件表
+CREATE TABLE IF NOT EXISTS TeamFiles
+(
+    tid int,
+    fileId int,
+    foreign key (tid) references TeamInfo (tid),
+    foreign key (fileId) references FileInfo (fileId)
+);
+
+-- 任务文件视图
+CREATE VIEW TaskFilesView AS
+SELECT T.taskId, F.fileId, F.fileName, F.filePath , F.Uploader ,F.created_at ,F.updated_at
+FROM TaskFiles AS T
+         LEFT JOIN FileInfo AS F ON T.fileId = F.fileId;
+
+-- 团队文件视图
+CREATE VIEW TeamFilesView AS
+SELECT T.tid, F.fileId, F.fileName, F.filePath , F.Uploader ,F.created_at ,F.updated_at
+FROM TeamFiles AS T
+         LEFT JOIN FileInfo AS F ON T.fileId = F.fileId;

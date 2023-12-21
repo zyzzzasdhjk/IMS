@@ -153,6 +153,6 @@ public class UserController : Controller
 
     public JsonResult CosDownloadTest()
     {
-        return Json(ObjectStorageService.GetReadRight("*"));
+        return Json(ObjectStorageService.GetDownloadRight("*"));
     }
 }

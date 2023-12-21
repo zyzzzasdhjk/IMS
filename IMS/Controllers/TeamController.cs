@@ -89,7 +89,7 @@ public class TeamController : Controller
     }
 
     /// <summary>
-    ///     获取团队的信息
+    /// 获取团队的信息
     /// </summary>
     /// <param name="u"></param>
     /// <param name="authorization"></param>
@@ -101,7 +101,7 @@ public class TeamController : Controller
 
 
     /// <summary>
-    ///     获取团队的所有的成员的信息
+    /// 获取团队的所有的成员的信息
     /// </summary>
     /// <param name="u"></param>
     /// <param name="authorization"></param>
@@ -116,5 +116,32 @@ public class TeamController : Controller
         }
         return Json(new AuthorizationReturnModel());*/
         return Json(_t.GetTeamMembers(u.Uid, u.Tid));
+    }
+
+    /// <summary>
+    /// 获取上传到指定路径的权限
+    /// </summary>
+    /// <param name="u"></param>
+    /// <param name="authorization"></param>
+    /// <returns></returns>
+    public JsonResult GetUploadRight([FromBody] TeamRequestModel u, [FromHeader] string authorization)
+    {
+        if (_u.IsAuthorization(u.Uid, authorization))
+            return Json(_t.GetUploadRight(u.Tid));
+        return Json(new ResponseModel(StatusModel.AuthorizationError, "没有权限"));
+    }
+    
+    public JsonResult UploadSuccess([FromBody] TeamUploadSuccessRequestModel u, [FromHeader] string authorization)
+    {
+        if (_u.IsAuthorization(u.Uid, authorization))
+            return Json(_t.UploadSuccess(u.Uid, u.Tid,u.FileName,u.FilePath));
+        return Json(new ResponseModel(StatusModel.AuthorizationError, "没有权限"));
+    }
+    
+    public JsonResult GetDownloadRight([FromBody] TeamRequestModel u, [FromHeader] string authorization)
+    {
+        if (_u.IsAuthorization(u.Uid, authorization))
+            return Json(_t.GetDownloadRight(u.Tid));
+        return Json(new ResponseModel(StatusModel.AuthorizationError, "没有权限"));
     }
 }
